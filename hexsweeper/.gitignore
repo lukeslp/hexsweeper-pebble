@@ -1,0 +1,6 @@
+build/
+.lock-waf*
+.waf*
+release/
+__pycache__/
+!resources/data/menu-icon.png
