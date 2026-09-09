@@ -74,8 +74,8 @@ static void draw(Layer *l, GContext *c) {
   if (screen == 2) {
     text(c, "HEXSWEEPER FLAT", 18, 36, true);
     text(c,
-         "37 cells. Six mines.\nTap aims; Select digs.\nHold Select to "
-         "flag.\nUp/Down move focus.\nBack opens the menu.",
+         "Tap aims; Select digs.\nHold Select to flag.\nUp/Down move focus.\n"
+         "Select a clue: open nearby\nif flags match. Back: menu.",
          62, 116, false);
     text(c, "Select to play", h - 36, 26, false);
     return;

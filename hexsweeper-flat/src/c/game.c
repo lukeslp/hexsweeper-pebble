@@ -62,10 +62,31 @@ bool game_flag(Game *g, int cell) {
   g->cells[cell] ^= HS_FLAG;
   return true;
 }
+bool game_chord(Game *g, int cell) {
+  if (cell < 0 || cell >= HS_CELLS || g->status != HS_ACTIVE ||
+      !(g->cells[cell] & HS_OPEN))
+    return false;
+  int flags = 0;
+  for (int j = 0; j < HS_MESH[cell].degree; j++)
+    flags += (g->cells[HS_MESH[cell].neighbors[j]] & HS_FLAG) != 0;
+  if (flags != game_clue(g, cell))
+    return false;
+  bool changed = false;
+  for (int j = 0; j < HS_MESH[cell].degree && g->status == HS_ACTIVE; j++) {
+    int n = HS_MESH[cell].neighbors[j];
+    // Never recurse through an open clue. Stop at the first mine so loss saves
+    // retain exactly one detonated cell, as in an ordinary dig.
+    if (!(g->cells[n] & (HS_OPEN | HS_FLAG)))
+      changed |= game_reveal(g, n);
+  }
+  return changed;
+}
 bool game_reveal(Game *g, int cell) {
   if (cell < 0 || cell >= HS_CELLS || g->status >= HS_WON ||
-      (g->cells[cell] & (HS_OPEN | HS_FLAG)))
+      (g->cells[cell] & HS_FLAG))
     return false;
+  if (g->cells[cell] & HS_OPEN)
+    return game_chord(g, cell);
   if (g->status == HS_READY)
     place(g, cell);
   g->cells[cell] |= HS_OPEN;

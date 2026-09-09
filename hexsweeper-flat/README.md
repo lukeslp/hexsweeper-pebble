@@ -5,10 +5,11 @@ By Luke Steuber. Native testing build 0.2.0.
 A flat hexagonal Minesweeper board that fits entirely on the watch: 37 cells, six mines and 31 safe cells. The first dig and its neighbors are safe. Clear every safe cell to win. Numbers count mines among up to six adjacent hexes. Boards are random and are not guaranteed to be solvable without guessing.
 
 - Tap a cell to focus it; Select digs. Touch never digs directly.
+- Select an open number to chord: when its neighboring flag count matches, reveal its unflagged neighbors. Incorrect flags can detonate a mine.
 - Hold Select for half a second to toggle a flag. A flagged cell cannot be dug.
 - Up/Down move focus backward/forward through rows from top to bottom. Every cell is reachable with buttons alone.
 - Back opens Resume, How to play, New board, and Save and exit. Replacing a board requires confirmation.
-- Drags and long touches are ignored. There is no zoom, scrolling or chording.
+- Drags and long touches are ignored. There is no zoom or scrolling.
 
 Covered cells have a gray fill and sparse dots. Open cells have a black interior and white numbers; blank open cells have no dots. Flagged cells have a solid amber fill and a bold black pennant, pole and base. The focused cell has a cyan and white double outline, distinct from the flag color. Mine symbols appear after a loss. These cues do not require distinguishing hues.
 
@@ -20,8 +21,7 @@ Targets: Pebble Time 2 (`emery`, 200 by 228) and Pebble Round 2 (`gabbro`, 260 b
 
 ```sh
 pebble build
-clang -std=c11 -Wall -Wextra -fsanitize=address,undefined test/core.c src/c/game.c -o build/core-test
-build/core-test
+sh test/core.sh
 # Use pebble-tool's Python environment:
 python test/emulator.py emery
 python test/emulator.py gabbro

@@ -28,6 +28,10 @@ in adjacent cells; pentagons have five neighbors, hexagons six. The first dig
 and its neighbors are safe. Clear all 35 safe cells to win. Flags are optional
 and protect a cell from digging and flood opening.
 
+With Dig selected, activate an open clue to chord: if its neighboring flag count
+matches the clue, its unflagged neighbors open. Incorrect flags can detonate a
+mine. This works on both pentagons and hexagons.
+
 | Control | During play |
 | --- | --- |
 | Drag | Rotate the sphere; never dig |
@@ -47,8 +51,7 @@ state without relying on color.
 Choose **Touch: direct** in the pause menu to make taps apply the current tool.
 Rim taps still only center a cell so a narrow edge cannot accidentally reveal it.
 A tap lasts at most 350 ms. Movement beyond eight pixels becomes a drag, even
-when the finger returns to its starting point. There is no inertia, pinch zoom,
-or number chording.
+when the finger returns to its starting point. There is no inertia or pinch zoom.
 
 The watch saves the board, orientation, selected cell, tool, and touch preference.
 New Game asks whether to replace the current board and defaults to keeping it.

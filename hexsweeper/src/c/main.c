@@ -234,8 +234,8 @@ static void menu(GContext *ctx) {
        fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorWhite);
   if (s.mode == HS_HELP) {
     const char *pages[] = {
-        "42 cells. Seven mines.\nNumbers count nearby mines.\nThe first dig "
-        "opens a safe patch.",
+        "42 cells. Seven mines.\nFirst dig is safe.\nSelect an open clue: reveal\n"
+        "neighbors if flags match.",
         "Drag to rotate. Tap to aim.\nSelect digs. Hold it to flag.\nDown "
         "switches Dig / Flag.",
         "Up opens Explore.\nUp / Down choose a neighbor.\nSelect moves. Back "
