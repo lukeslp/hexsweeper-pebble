@@ -1,4 +1,4 @@
-# Hexsweeper Sphere for Pebble
+# Hexsweeper 3D for Pebble
 
 A small sphere of 42 cells, with seven hidden mines. Drag it to turn it in your
 hand, or travel around it using the watch buttons. Built by Luke Steuber.

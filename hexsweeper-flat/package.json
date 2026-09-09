@@ -8,7 +8,7 @@
   ],
   "dependencies": {},
   "pebble": {
-    "displayName": "Hexsweeper Flat",
+    "displayName": "Hexsweeper",
     "companyName": "Luke Steuber",
     "uuid": "7e9b9f91-d51f-453f-9689-5f1204021963",
     "sdkVersion": "3",

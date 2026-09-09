@@ -6,7 +6,7 @@
   "keywords": ["pebble-app"],
   "dependencies": {},
   "pebble": {
-    "displayName": "Hexsweeper Sphere",
+    "displayName": "Hexsweeper 3D",
     "companyName": "Luke Steuber",
     "uuid": "f42b810c-aef1-4937-bf01-5e36d5f29407",
     "sdkVersion": "3",

@@ -1,4 +1,4 @@
-# Hexsweeper Flat for Pebble
+# Hexsweeper for Pebble
 
 By Luke Steuber. Native testing build 0.2.0.
 
@@ -13,7 +13,7 @@ A flat hexagonal Minesweeper board that fits entirely on the watch: 37 cells, si
 
 Covered cells have a gray fill and sparse dots. Open cells have a black interior and white numbers; blank open cells have no dots. Flagged cells have a solid amber fill and a bold black pennant, pole and base. The focused cell has a cyan and white double outline, distinct from the flag color. Mine symbols appear after a loss. These cues do not require distinguishing hues.
 
-Flat has its own app UUID and save, so it installs alongside Hexsweeper Sphere. The game saves the board and focused cell locally with a checksum. It uses no phone JavaScript, network or accounts.
+Flat has its own app UUID and save, so it installs alongside Hexsweeper 3D. The game saves the board and focused cell locally with a checksum. It uses no phone JavaScript, network or accounts.
 
 ## Build and verify
 

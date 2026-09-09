@@ -1,4 +1,4 @@
-// Hexsweeper Sphere. Luke Steuber.
+// Hexsweeper 3D. Luke Steuber.
 #include "compat.h"
 #include "controller.h"
 #include <math.h>
@@ -229,7 +229,7 @@ static void menu(GContext *ctx) {
   const int inset = PBL_IF_ROUND_ELSE(43, 14), w = width - 2 * inset;
   const char *title = s.mode == HS_CONFIRM ? "NEW SPHERE?"
                       : s.mode == HS_HELP  ? "HOW TO PLAY"
-                                           : "HEXSWEEPER";
+                                           : "HEXSWEEPER 3D";
   text(ctx, title, GRect(inset, PBL_IF_ROUND_ELSE(25, 15), w, 27),
        fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorWhite);
   if (s.mode == HS_HELP) {
