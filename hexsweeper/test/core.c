@@ -1,4 +1,5 @@
 // Luke Steuber. Exercise production rules, projection and input state machine.
+#include "compat.h"
 #include "controller.h"
 #include "geometry.h"
 #include <assert.h>
@@ -232,6 +233,15 @@ static void persistence(void) {
   assert(!controller_restore(&d, &save, sizeof save));
 }
 int main(void) {
+  assert(!firmware_allows_touch(3, 99, 255));
+  assert(!firmware_allows_touch(4, 9, 169));
+  assert(!firmware_allows_touch(4, 17, 0));
+  assert(!firmware_allows_touch(4, 32, 255));
+  assert(!firmware_allows_touch(4, 33, 0));
+  assert(!firmware_allows_touch(4, 33, 1));
+  assert(firmware_allows_touch(4, 33, 2));
+  assert(firmware_allows_touch(4, 37, 0));
+  assert(firmware_allows_touch(5, 0, 0));
   rules();
   geometry();
   input();

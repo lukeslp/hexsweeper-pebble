@@ -1,4 +1,5 @@
 // Hexsweeper Sphere. Luke Steuber.
+#include "compat.h"
 #include "controller.h"
 #include <math.h>
 #include <pebble.h>
@@ -10,6 +11,7 @@ static AppTimer *tap_timer;
 static uint32_t gesture_clock;
 static uint32_t last_frame;
 static bool focused = true, save_failed;
+static bool touch_ready;
 static int width, height;
 enum { SAVE_KEY = 1 };
 _Static_assert(sizeof(SavedGame) <= PERSIST_DATA_MAX_LENGTH,
@@ -188,6 +190,8 @@ static void board(GContext *ctx) {
   const char *hint = s.mode == HS_EXPLORE ? "Select: move  Back: play"
                      : s.direct           ? "Tap acts · Up: explore"
                                           : "Tap aims · Select: act";
+  if (!touch_ready && s.mode == HS_PLAY)
+    hint = "Up: explore · Select: act";
   if (save_failed)
     hint = "Save failed · Keep app open";
   text(ctx, hint,
@@ -203,7 +207,7 @@ static void menu(GContext *ctx) {
   text(ctx, title, GRect(inset, PBL_IF_ROUND_ELSE(25, 15), w, 27),
        fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorWhite);
   if (s.mode == HS_HELP) {
-    static const char *pages[] = {
+    const char *pages[] = {
         "42 cells. Seven mines.\nNumbers count nearby mines.\nThe first dig "
         "opens a safe patch.",
         "Drag to rotate. Tap to aim.\nSelect digs. Hold it to flag.\nDown "
@@ -212,6 +216,12 @@ static void menu(GContext *ctx) {
         "returns to play.",
         "Back opens the menu.\nChoose direct taps there.\nRim taps only "
         "aim.\nGames save on this watch."};
+    if (!touch_ready) {
+      pages[1] = "Select digs. Hold it to flag.\nDown switches Dig / Flag.\nUp "
+                 "opens Explore.";
+      pages[3] = "Touch needs firmware 4.33.2 or later.\nUse buttons to "
+                 "play.\nGames save on this watch.";
+    }
     text(ctx, pages[s.help], GRect(inset, 64, w, height - 106),
          fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GColorWhite);
     char hint[36];
@@ -223,6 +233,8 @@ static void menu(GContext *ctx) {
   const char *items[5] = {"Resume",
                           s.direct ? "Touch: direct" : "Touch: aim first",
                           "Controls", "New game", "Save & exit"};
+  if (!touch_ready)
+    items[1] = "Touch: update watch";
   const char *confirm[2] = {"Keep playing", "Replace game"};
   int count = s.mode == HS_CONFIRM ? 2 : 5;
   if (s.mode == HS_CONFIRM)
@@ -259,6 +271,13 @@ static void draw(Layer *layer, GContext *ctx) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "HS frame_ms=%lu", (unsigned long)elapsed);
 }
 static void button(int b) {
+  if (!touch_ready && s.mode == HS_PAUSE && s.menu == 1 && b == HS_SELECT) {
+    s.mode = HS_HELP;
+    s.help = 3;
+    redraw();
+    trace();
+    return;
+  }
   bool exit = s.mode == HS_PAUSE && s.menu == 4 && b == HS_SELECT;
   controller_button(&s, b);
   if (!s.gesture.active)
@@ -345,21 +364,29 @@ static void unload(Window *w) {
   canvas = NULL;
 }
 int main(void) {
+  WatchInfoVersion firmware = watch_info_get_firmware_version();
+  touch_ready =
+      firmware_allows_touch(firmware.major, firmware.minor, firmware.patch);
+  APP_LOG(APP_LOG_LEVEL_INFO, "HS firmware=%u.%u.%u touch=%u", firmware.major,
+          firmware.minor, firmware.patch, touch_ready);
   window = window_create();
   window_set_background_color(window, GColorBlack);
   window_set_window_handlers(window,
                              (WindowHandlers){.load = load, .unload = unload});
   window_set_click_config_provider(window, clicks);
-  window_set_touch_bridge_disabled(window, true);
+  // Third-party apps are opted out of system touch navigation by default.
+  // Do not call the newer bridge API just to retain that default.
   window_stack_push(window, false);
-  touch_service_subscribe(touch, NULL);
+  if (touch_ready)
+    touch_service_subscribe(touch, NULL);
   app_focus_service_subscribe(focus);
   app_event_loop();
   controller_cancel(&s);
   cancel_tap();
   record();
   cancel_frame();
-  touch_service_unsubscribe();
+  if (touch_ready)
+    touch_service_unsubscribe();
   app_focus_service_unsubscribe();
   window_destroy(window);
 }

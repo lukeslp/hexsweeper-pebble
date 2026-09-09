@@ -8,6 +8,13 @@ and **Pebble Round 2** (`gabbro`, 260 × 260). It does not target the older
 Pebble 2 or Time Round. It uses no phone JavaScript, network, account, microphone,
 or health permissions.
 
+Touch requires firmware **4.33.2 or later**. Version 0.1.1 checks the firmware
+before subscribing to touch and removes the unconditional touch-bridge call
+from startup. On older firmware the app uses button controls and explains the
+touch requirement in Controls. The UUID and save format are unchanged from 0.1.0.
+This addresses a launch compatibility risk; the reported physical Time 2 crash
+has not yet been reproduced or confirmed fixed on that watch.
+
 ## Playing
 
 The 30 hexagons and 12 pentagons form one connected sphere. Numbers count mines
@@ -75,7 +82,7 @@ It uses SDK emulator internals and is pinned to the toolchain above.
 
 `tools/package.py` requires passing reports for both targets that match the exact
 PBW hash. It stages the PBW, portable source ZIP, screenshots, reports and checksums
-under `release/0.1.0/`. The ZIP retains the repository-relative geometry input;
+under `release/<version>/`. The ZIP retains the repository-relative geometry input;
 unzip it and enter `hexsweeper-source/appstores/pebble/hexsweeper` to build.
 
 ## Implementation
@@ -89,11 +96,19 @@ unzip it and enter `hexsweeper-source/appstores/pebble/hexsweeper` to build.
 
 Rendering is event driven with drag redraw requests capped at 20 Hz. There is
 no idle animation. Cell labels remain upright and disappear on the narrow rim.
-The frontmost cell becomes the selection after a drag. Touch navigation bridging
-is disabled for this window so the firmware does not also turn a drag into a
-button action.
+The frontmost cell becomes the selection after a drag. The app retains the
+firmware's default opt-out from system touch navigation, so the firmware does
+not also turn a drag into a button action. It does not call the new bridge API
+to retain that default.
 
 ## Validation boundary
+
+Version 0.1.1 passed the sanitizer suite, firmware-boundary checks and all 16
+native interaction checks on both SDK 4.33.1 emulators (firmware 4.33.2) on
+September 9, 2026. RAM footprint is 19,516 bytes on Time 2 and 19,520 on Round 2.
+The older-firmware guard is unit tested; launch on an older physical firmware
+has not been verified. The older SDK emulator probes did not finish booting,
+so they provide no app compatibility evidence.
 
 Version 0.1.0 passed the sanitizer suite and all 16 native interaction checks on
 both emulators on September 9, 2026. The final RAM footprint is 19,048 bytes on
