@@ -8,6 +8,8 @@ and **Pebble Round 2** (`gabbro`, 260 × 260). It does not target the older
 Pebble 2 or Time Round. It uses no phone JavaScript, network, account, microphone,
 or health permissions.
 
+Testing build **0.2.0** advances the watch-visible major/minor version and removes general-purpose math-library calls from projection and rendering. The UUID and saved-board format stay unchanged. The reported phone installation failure remains unverified on hardware.
+
 Touch requires firmware **4.33.2 or later**. Version 0.1.1 checks the firmware
 before subscribing to touch and removes the unconditional touch-bridge call
 from startup. On older firmware the app uses button controls and explains the
@@ -102,6 +104,8 @@ not also turn a drag into a button action. It does not call the new bridge API
 to retain that default.
 
 ## Validation boundary
+
+Version 0.2.0 passed the sanitizer suite and all 16 native interaction checks on both targets using firmware 4.33.2. These checks install and launch the exact packaged PBW in isolated emulators; they do not establish why installation failed through the physical phone/watch.
 
 Version 0.1.1 passed the sanitizer suite, firmware-boundary checks and all 16
 native interaction checks on both SDK 4.33.1 emulators (firmware 4.33.2) on

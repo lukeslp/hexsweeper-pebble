@@ -3,6 +3,7 @@
 #include "controller.h"
 #include <math.h>
 #include <pebble.h>
+static int round_coord(float x) { return (int)(x < 0 ? x - .5f : x + .5f); }
 static Controller s;
 static Window *window;
 static Layer *canvas;
@@ -124,8 +125,8 @@ static void board(GContext *ctx) {
       if (poly.count < 3)
         continue;
       for (int j = 0; j < poly.count; j++)
-        points[j] = GPoint((int16_t)lroundf(poly.p[j].x),
-                           (int16_t)lroundf(poly.p[j].y));
+        points[j] = GPoint((int16_t)round_coord(poly.p[j].x),
+                           (int16_t)round_coord(poly.p[j].y));
       path.num_points = (uint32_t)poly.count;
       bool open = (s.game.cells[i] & HS_OPEN) != 0;
       bool mine = (s.game.cells[i] & HS_MINE) != 0 && s.game.status == HS_LOST;
@@ -144,8 +145,8 @@ static void board(GContext *ctx) {
       gpath_draw_outline(ctx, &path);
       if (pass == 1 || poly.center.z < .6f)
         continue;
-      int x = (int)lroundf(s.viewport.x + s.viewport.r * poly.center.x),
-          y = (int)lroundf(s.viewport.y - s.viewport.r * poly.center.y);
+      int x = (int)round_coord(s.viewport.x + s.viewport.r * poly.center.x),
+          y = (int)round_coord(s.viewport.y - s.viewport.r * poly.center.y);
       if (mine)
         mine_symbol(ctx, x, y);
       else if (s.game.cells[i] & HS_FLAG)

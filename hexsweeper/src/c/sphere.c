@@ -2,6 +2,27 @@
 #include "sphere.h"
 #include "geometry.h"
 #include <math.h>
+#include <string.h>
+// Bounded positive square root; avoids linking the full newlib math runtime.
+static float root_positive(float x) {
+  if (!(x > 0))
+    return 0;
+  uint32_t bits;
+  memcpy(&bits, &x, sizeof bits);
+  bits = (bits >> 1) + 0x1fc00000u;
+  float r;
+  memcpy(&r, &bits, sizeof r);
+  for (int i = 0; i < 4; i++)
+    r = .5f * (r + x / r);
+  return r;
+}
+static bool angle_after(Vec a, Vec b) {
+  // atan2(-y,x) order without trigonometric library calls.
+  bool ah = a.y <= 0, bh = b.y <= 0;
+  if (ah != bh)
+    return ah > bh;
+  return a.y * b.x - a.x * b.y < 0;
+}
 static Vec add(Vec a, Vec b) { return (Vec){a.x + b.x, a.y + b.y, a.z + b.z}; }
 static Vec scale(Vec a, float k) { return (Vec){a.x * k, a.y * k, a.z * k}; }
 static float dot(Vec a, Vec b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
@@ -10,14 +31,14 @@ static Vec cross(Vec a, Vec b) {
                a.x * b.y - a.y * b.x};
 }
 static Vec normalize(Vec v) {
-  float n = sqrtf(dot(v, v));
+  float n = root_positive(dot(v, v));
   return n > 1e-7f ? scale(v, 1 / n) : (Vec){0, 0, 1};
 }
 static Vec unpack(MeshPoint p) {
   return (Vec){p.x / 32767.f, p.y / 32767.f, p.z / 32767.f};
 }
 static Quat qnormal(Quat q) {
-  float n = sqrtf(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+  float n = root_positive(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
   return n > 1e-7f ? (Quat){q.w / n, q.x / n, q.y / n, q.z / n}
                    : sphere_identity();
 }
@@ -54,7 +75,7 @@ Vec sphere_arcball(Viewport v, float x, float y) {
   Vec p = {(x - v.x) / v.r, (v.y - y) / v.r, 0};
   float d = p.x * p.x + p.y * p.y;
   if (d <= 1)
-    p.z = sqrtf(1 - d);
+    p.z = root_positive(1 - d);
   else
     p = normalize(p);
   return p;
@@ -115,23 +136,23 @@ int sphere_front(Quat q) {
   return best;
 }
 int sphere_neighbors(Quat q, int cell, uint8_t out[6]) {
-  float angles[6];
+  Vec directions[6];
   int n = HS_MESH[cell].degree;
   for (int i = 0; i < n; i++) {
     out[i] = HS_MESH[cell].neighbors[i];
     Vec p = sphere_rotate(q, sphere_center(out[i]));
-    angles[i] = atan2f(-p.y, p.x);
+    directions[i] = p;
   }
   for (int i = 1; i < n; i++) {
-    float a = angles[i];
+    Vec a = directions[i];
     uint8_t t = out[i];
     int j = i;
-    while (j > 0 && angles[j - 1] > a) {
-      angles[j] = angles[j - 1];
+    while (j > 0 && angle_after(directions[j - 1], a)) {
+      directions[j] = directions[j - 1];
       out[j] = out[j - 1];
       j--;
     }
-    angles[j] = a;
+    directions[j] = a;
     out[j] = t;
   }
   return n;
