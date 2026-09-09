@@ -217,6 +217,11 @@ def run(platform):
         expect(status=0, opened=0)
         button('Select', .65)
         expect(flags=1, opened=0, status=0)  # Long click must suppress short dig.
+        grab('flag')
+        button('Up')
+        expect(mode=1, flags=1, opened=0)
+        grab('flag-unfocused')
+        button('Back')
         restart()
         expect(flags=1, opened=0, status=0)
         button('Select', .65)

@@ -81,10 +81,10 @@ static void text(GContext *ctx, const char *value, GRect rect, GFont font,
 static void flag_symbol(GContext *ctx, int x, int y, GColor color) {
   graphics_context_set_stroke_color(ctx, color);
   graphics_context_set_stroke_width(ctx, 2);
-  graphics_draw_line(ctx, GPoint(x - 4, y - 6), GPoint(x - 4, y + 7));
-  graphics_draw_line(ctx, GPoint(x - 7, y + 7), GPoint(x + 3, y + 7));
-  GPoint points[] = {GPoint(x - 3, y - 6), GPoint(x + 6, y - 2),
-                     GPoint(x - 3, y + 1)};
+  graphics_draw_line(ctx, GPoint(x - 5, y - 8), GPoint(x - 5, y + 8));
+  graphics_draw_line(ctx, GPoint(x - 8, y + 8), GPoint(x + 4, y + 8));
+  GPoint points[] = {GPoint(x - 4, y - 8), GPoint(x + 8, y - 3),
+                     GPoint(x - 4, y + 2)};
   GPath p = {.num_points = 3, .points = points};
   graphics_context_set_fill_color(ctx, color);
   gpath_draw_filled(ctx, &p);
@@ -128,18 +128,28 @@ static void board(GContext *ctx) {
         points[j] = GPoint((int16_t)round_coord(poly.p[j].x),
                            (int16_t)round_coord(poly.p[j].y));
       path.num_points = (uint32_t)poly.count;
+      bool flagged = (s.game.cells[i] & HS_FLAG) != 0;
       bool open = (s.game.cells[i] & HS_OPEN) != 0;
       bool mine = (s.game.cells[i] & HS_MINE) != 0 && s.game.status == HS_LOST;
-      GColor fill = mine ? GColorMelon : open ? GColorWhite : GColorDarkGray;
+      GColor fill = mine      ? GColorMelon
+                    : flagged ? GColorChromeYellow
+                    : open    ? GColorWhite
+                              : GColorDarkGray;
       if (pass == 0) {
         graphics_context_set_fill_color(ctx, fill);
         gpath_draw_filled(ctx, &path);
       }
-      graphics_context_set_stroke_color(ctx, pass == 1 ? GColorChromeYellow
+      // Focus uses cyan over a white border, independently of amber flags.
+      if (pass == 1) {
+        graphics_context_set_stroke_color(ctx, GColorWhite);
+        graphics_context_set_stroke_width(ctx, 5);
+        gpath_draw_outline(ctx, &path);
+      }
+      graphics_context_set_stroke_color(ctx, pass == 1 ? GColorCyan
                                                        : GColorLightGray);
-      graphics_context_set_stroke_width(ctx, pass == 1 ? 3 : 1);
+      graphics_context_set_stroke_width(ctx, pass == 1 ? 2 : 1);
       gpath_draw_outline(ctx, &path);
-      if (pass == 0 && !open && !mine && poly.center.z >= .6f) {
+      if (pass == 0 && !open && !mine && !flagged && poly.center.z >= .6f) {
         // Inset polygon gives covered cells a raised shape independent of hue.
         int cx = round_coord(s.viewport.x + s.viewport.r * poly.center.x);
         int cy = round_coord(s.viewport.y - s.viewport.r * poly.center.y);
@@ -158,7 +168,7 @@ static void board(GContext *ctx) {
       if (mine)
         mine_symbol(ctx, x, y);
       else if (s.game.cells[i] & HS_FLAG)
-        flag_symbol(ctx, x, y, GColorChromeYellow);
+        flag_symbol(ctx, x, y, GColorBlack);
       else if (!open) {
         // Sparse covered-cell texture; projected rim facets stay uncluttered.
         graphics_context_set_stroke_color(ctx, GColorLightGray);

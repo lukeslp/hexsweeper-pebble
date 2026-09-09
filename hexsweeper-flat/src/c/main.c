@@ -103,20 +103,22 @@ static void draw(Layer *l, GContext *c) {
         continue;
       GPoint p = center(i);
       int state = g.cells[i];
+      bool flagged = state & HS_FLAG;
       bool open = state & HS_OPEN,
            mine = (state & HS_MINE) && g.status == HS_LOST;
       if (pass) {
         graphics_context_set_stroke_width(c, 2);
         graphics_context_set_stroke_color(c, GColorWhite);
         hex(c, p, 0, false);
-        graphics_context_set_stroke_color(c, GColorChromeYellow);
+        graphics_context_set_stroke_color(c, GColorCyan);
         hex(c, p, 2, false);
         graphics_context_set_stroke_width(c, 1);
         continue;
       }
-      graphics_context_set_fill_color(c, mine   ? GColorMelon
-                                         : open ? GColorBlack
-                                                : GColorDarkGray);
+      graphics_context_set_fill_color(c, mine      ? GColorMelon
+                                         : flagged ? GColorChromeYellow
+                                         : open    ? GColorBlack
+                                                   : GColorDarkGray);
       hex(c, p, 1, true);
       graphics_context_set_stroke_color(c, GColorLightGray);
       hex(c, p, 1, false);
@@ -126,15 +128,20 @@ static void draw(Layer *l, GContext *c) {
         graphics_context_set_stroke_color(c, GColorBlack);
         graphics_draw_line(c, GPoint(p.x - 6, p.y), GPoint(p.x + 6, p.y));
         graphics_draw_line(c, GPoint(p.x, p.y - 6), GPoint(p.x, p.y + 6));
-      } else if (state & HS_FLAG) {
-        graphics_context_set_stroke_color(c, GColorWhite);
+      } else if (flagged) {
+        // Solid amber tile, dark pennant and thick pole survive low saturation.
+        graphics_context_set_stroke_color(c, GColorBlack);
+        graphics_context_set_stroke_width(c, 2);
         graphics_draw_line(c, GPoint(p.x - 3, p.y - 6),
                            GPoint(p.x - 3, p.y + 6));
-        GPoint v[] = {GPoint(p.x - 2, p.y - 6), GPoint(p.x + 5, p.y - 3),
-                      GPoint(p.x - 2, p.y)};
+        graphics_draw_line(c, GPoint(p.x - 6, p.y + 6),
+                           GPoint(p.x + 3, p.y + 6));
+        GPoint v[] = {GPoint(p.x - 2, p.y - 6), GPoint(p.x + 6, p.y - 3),
+                      GPoint(p.x - 2, p.y + 1)};
         GPath a = {.num_points = 3, .points = v};
-        graphics_context_set_fill_color(c, GColorChromeYellow);
+        graphics_context_set_fill_color(c, GColorBlack);
         gpath_draw_filled(c, &a);
+        graphics_context_set_stroke_width(c, 1);
       } else if (open) {
         int n = game_clue(&g, i);
         if (n) {

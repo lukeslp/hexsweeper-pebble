@@ -8,6 +8,8 @@ and **Pebble Round 2** (`gabbro`, 260 × 260). It does not target the older
 Pebble 2 or Time Round. It uses no phone JavaScript, network, account, microphone,
 or health permissions.
 
+Version **0.4.0** gives flagged cells a solid amber fill and a larger black flag. The fill stays visible as a cell rotates toward the rim. A cyan outline over a white border marks focus independently of flags. Saved boards and game rules are unchanged.
+
 Version **0.3.0** adds inset outlines and sparse dots to covered front-facing cells, with flat white open cells and black numbers. Fills no longer change with depth, so rotation does not change their state cue. Flags and the selected-cell outline remain distinct.
 
 Testing build **0.2.0** advances the watch-visible major/minor version and removes general-purpose math-library calls from projection and rendering. The UUID and saved-board format stay unchanged. The reported phone installation failure remains unverified on hardware.
@@ -39,7 +41,7 @@ and protect a cell from digging and flood opening.
 Explore supports a complete game with buttons alone. Up and Down cycle through
 the centered cell's neighbors in clockwise order. Select moves to the highlighted
 neighbor and centers it. Back returns to play, where Select applies the tool.
-The thicker gold outline marks the target; numbers and flag symbols convey cell
+The cyan and white outline marks the target; numbers and flag symbols convey cell
 state without relying on color.
 
 Choose **Touch: direct** in the pause menu to make taps apply the current tool.
@@ -107,7 +109,7 @@ to retain that default.
 
 ## Validation boundary
 
-Version 0.3.0 retains the 0.2 rules and saved-board format. Its graphics changes are checked with the same native interaction suite and captures on both display shapes. Physical discrimination of tile states remains a watch test.
+Version 0.4.0 retains the 0.2 rules and saved-board format. Its graphics changes are checked with the same native interaction suite and captures on both display shapes. Physical discrimination of tile states remains a watch test.
 
 Version 0.2.0 passed the sanitizer suite and all 16 native interaction checks on both targets using firmware 4.33.2. These checks install and launch the exact packaged PBW in isolated emulators; they do not establish why installation failed through the physical phone/watch.
 

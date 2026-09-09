@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "Measured": [
+    "Native interaction suite passed on emery and gabbro",
+    "Standalone source archive builds both targets"
+  ],
+  "Observed": [
+    "Selected and unfocused flag captures inspected on both display sizes"
+  ],
+  "limits": [
+    "Physical watch readability remains unverified"
+  ],
+  "targets": [
+    "emery",
+    "gabbro"
+  ],
+  "store": "New flag build is staged locally; existing store draft retains its uploaded version."
+}
