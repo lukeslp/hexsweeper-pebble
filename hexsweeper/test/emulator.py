@@ -204,6 +204,7 @@ def run(platform):
         AppInstaller(watch, str(PBW)).install()
         watch.send_packet(AppRunState(data=AppRunStateStart(uuid=APP)))
         time.sleep(1)
+        button('Select')  # Fresh mode picker defaults to 3D.
         expect(mode=3, help=0)
         for page in range(4):
             expect(help=page)

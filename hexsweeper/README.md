@@ -1,4 +1,34 @@
-# Hexsweeper 3D for Pebble
+# Hexsweeper for Pebble
+
+The combined development build offers **Classic, Infinite, and 3D** in one app.
+Each mode keeps its own board. The first launch opens the mode picker; later
+launches resume the last mode. Choose Game modes from the pause menu to switch,
+or Save and exit from the picker to return to the watch.
+
+| Mode | Board and objective |
+| --- | --- |
+| Classic | 37 cells, six mines. Reveal all 31 safe cells to win. |
+| Infinite | Explore a deterministic field and increase the safe-cell count. No final board or win screen. |
+| 3D | 42 cells, seven mines. Reveal all 35 safe cells to win. |
+
+All modes protect the first dig and its neighbors and support chording. With Dig
+active, select an open clue: matching neighboring flags open the other neighbors.
+Incorrect flags can lose the game. Flags have an amber fill and black pennant.
+
+Classic uses Up/Down to move focus, Select to dig or chord, and hold Select to flag.
+Touch aims without digging. Infinite adds drag panning, Up for six-direction
+button exploration, and Down to switch Dig/Flag. Back opens the pause menu.
+
+Infinite retains up to 64 explored 8-by-8 chunks. Discovered cells are never
+recycled. At the history limit, a message explains that new areas cannot be
+saved; existing areas remain playable. Removing the last flag from an otherwise
+untouched chunk frees its slot. Two checksummed snapshots retain position, flags,
+revealed cells and pending flood expansion across interrupted saves.
+
+The combined app keeps the existing 3D UUID and save format. The old standalone
+Classic app has separate storage that this app cannot import. Archived releases
+and historical validation below describe the earlier standalone 3D app; the
+combined development build has not yet been packaged or uploaded.
 
 A small sphere of 42 cells, with seven hidden mines. Drag it to turn it in your
 hand, or travel around it using the watch buttons. Built by Luke Steuber.
@@ -69,6 +99,8 @@ pebble build
 # Use the Python interpreter belonging to the installed pebble-tool environment:
 python test/emulator.py emery
 python test/emulator.py gabbro
+python test/combined.py emery
+python test/combined.py gabbro
 python3 tools/package.py
 ```
 

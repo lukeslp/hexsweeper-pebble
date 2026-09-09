@@ -1,6 +1,7 @@
 // Hexsweeper 3D. Luke Steuber.
 #include "compat.h"
 #include "controller.h"
+#include "flat.h"
 #include <math.h>
 #include <pebble.h>
 static int round_coord(float x) { return (int)(x < 0 ? x - .5f : x + .5f); }
@@ -14,6 +15,10 @@ static uint32_t last_frame;
 static bool focused = true, save_failed;
 static bool touch_ready;
 static int width, height;
+static int app_mode = 2, mode_choice;
+static bool picker, chose_mode, picker_touched, picker_dragged;
+static GPoint picker_down;
+static uint32_t picker_time;
 enum { SAVE_KEY = 1 };
 _Static_assert(sizeof(SavedGame) <= PERSIST_DATA_MAX_LENGTH,
                "Save exceeds one atomic record");
@@ -24,12 +29,28 @@ static uint32_t now_ms(void) {
   return (uint32_t)seconds * 1000u + ms;
 }
 static void record(void) {
+  if (picker && !chose_mode)
+    return;
+  if (app_mode != 2) {
+    save_failed = !flat_save();
+    if (!save_failed)
+      save_failed = persist_write_int(2, app_mode) != sizeof(int32_t);
+    return;
+  }
   SavedGame save;
   controller_save(&s, &save);
   save_failed =
       persist_write_data(SAVE_KEY, &save, sizeof save) != (int)sizeof save;
+  if (!save_failed)
+    save_failed = persist_write_int(2, app_mode) != sizeof(int32_t);
 }
 static void trace(void) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "HX app=%d picker=%d choice=%d", app_mode, picker,
+          mode_choice);
+  if (app_mode != 2) {
+    flat_trace();
+    return;
+  }
   APP_LOG(APP_LOG_LEVEL_INFO, "HS seed=%lu flags=%d",
           (unsigned long)s.game.seed, game_flag_count(&s.game));
   APP_LOG(APP_LOG_LEVEL_INFO,
@@ -60,8 +81,14 @@ static void expire_tap(void *ctx) {
 }
 static void frame(void *ctx) {
   frame_timer = NULL;
-  if (focused)
+  if (focused) {
+    if (!picker && app_mode != 2) {
+      flat_tick();
+      if (flat_busy())
+        frame_timer = app_timer_register(25, frame, NULL);
+    }
     redraw();
+  }
 }
 static void schedule(void) {
   if (!frame_timer) {
@@ -234,7 +261,8 @@ static void menu(GContext *ctx) {
        fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorWhite);
   if (s.mode == HS_HELP) {
     const char *pages[] = {
-        "42 cells. Seven mines.\nFirst dig is safe.\nSelect an open clue: reveal\n"
+        "42 cells. Seven mines.\nFirst dig is safe.\nSelect an open clue: "
+        "reveal\n"
         "neighbors if flags match.",
         "Drag to rotate. Tap to aim.\nSelect digs. Hold it to flag.\nDown "
         "switches Dig / Flag.",
@@ -258,7 +286,7 @@ static void menu(GContext *ctx) {
   }
   const char *items[5] = {"Resume",
                           s.direct ? "Touch: direct" : "Touch: aim first",
-                          "Controls", "New game", "Save & exit"};
+                          "Controls", "New game", "Game modes"};
   if (!touch_ready)
     items[1] = "Touch: update watch";
   const char *confirm[2] = {"Keep playing", "Replace game"};
@@ -288,7 +316,29 @@ static void draw(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack);
   graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornersAll);
   graphics_context_set_antialiased(ctx, true);
-  if (s.mode == HS_PLAY || s.mode == HS_EXPLORE)
+  if (save_failed) {
+    text(ctx, "Save interrupted. Select to retry.",
+         GRect(25, 70, width - 50, 90),
+         fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorWhite);
+  } else if (picker) {
+    text(ctx, "HEXSWEEPER", GRect(25, 22, width - 50, 32),
+         fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorWhite);
+    const char *names[] = {"Classic", "Infinite", "3D", "Save and exit"};
+    for (int i = 0; i < 4; i++) {
+      GRect r = GRect(30, 64 + i * 30, width - 60, 29);
+      if (i == mode_choice) {
+        graphics_context_set_fill_color(ctx, GColorDarkGray);
+        graphics_fill_rect(ctx, r, 3, GCornersAll);
+      }
+      text(ctx, names[i], r, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+           GColorWhite);
+    }
+    text(ctx, "Each mode keeps its board",
+         GRect(25, height - 32, width - 50, 23),
+         fonts_get_system_font(FONT_KEY_GOTHIC_14), GColorWhite);
+  } else if (app_mode != 2)
+    flat_draw(ctx);
+  else if (s.mode == HS_PLAY || s.mode == HS_EXPLORE)
     board(ctx);
   else
     menu(ctx);
@@ -297,6 +347,70 @@ static void draw(Layer *layer, GContext *ctx) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "HS frame_ms=%lu", (unsigned long)elapsed);
 }
 static void button(int b) {
+  if (save_failed) {
+    if (b == HS_SELECT)
+      record();
+    trace();
+    redraw();
+    return;
+  }
+  if (picker) {
+    if (b == HS_UP)
+      mode_choice = (mode_choice + 3) % 4;
+    else if (b == HS_DOWN)
+      mode_choice = (mode_choice + 1) % 4;
+    else if (b == HS_BACK || (b == HS_SELECT && mode_choice == 3)) {
+      record();
+      if (!save_failed) {
+        window_stack_pop_all(false);
+        return;
+      }
+    } else if (b == HS_SELECT) {
+      app_mode = mode_choice;
+      chose_mode = true;
+      picker = false;
+      if (app_mode != 2)
+        flat_init(app_mode, width, height);
+      else if (s.mode == HS_PAUSE)
+        s.mode = HS_PLAY;
+      record();
+    }
+    trace();
+    redraw();
+    if (!picker && app_mode != 2 && flat_busy())
+      schedule();
+    return;
+  }
+  if (app_mode != 2) {
+    int result = flat_button(b);
+    cancel_frame();
+    record();
+    if (!save_failed && result == 2) {
+      window_stack_pop_all(false);
+      return;
+    }
+    if (!save_failed && result == 1) {
+      picker = true;
+      mode_choice = app_mode;
+      flat_cancel();
+    }
+    trace();
+    redraw();
+    if (!picker && flat_busy())
+      schedule();
+    return;
+  }
+  if (s.mode == HS_PAUSE && s.menu == 4 && b == HS_SELECT) {
+    record();
+    if (!save_failed) {
+      picker = true;
+      mode_choice = 2;
+      controller_cancel(&s);
+    }
+    trace();
+    redraw();
+    return;
+  }
   if (!touch_ready && s.mode == HS_PAUSE && s.menu == 1 && b == HS_SELECT) {
     s.mode = HS_HELP;
     s.help = 3;
@@ -304,7 +418,7 @@ static void button(int b) {
     trace();
     return;
   }
-  bool exit = s.mode == HS_PAUSE && s.menu == 4 && b == HS_SELECT;
+
   controller_button(&s, b);
   if (!s.gesture.active)
     cancel_tap();
@@ -312,8 +426,6 @@ static void button(int b) {
   record();
   trace();
   redraw();
-  if (exit && !save_failed)
-    window_stack_pop_all(false);
 }
 static void up(ClickRecognizerRef r, void *ctx) { button(HS_UP); }
 static void down(ClickRecognizerRef r, void *ctx) { button(HS_DOWN); }
@@ -332,6 +444,47 @@ static void clicks(void *ctx) {
 static void touch(const TouchEvent *e, void *ctx) {
   if (!focused)
     return;
+  if (picker) {
+    if (e->type == TouchEvent_Touchdown) {
+      picker_touched = true;
+      picker_dragged = false;
+      picker_down = GPoint(e->x, e->y);
+      picker_time = now_ms();
+    } else if (picker_touched) {
+      if (abs(e->x - picker_down.x) > 8 || abs(e->y - picker_down.y) > 8)
+        picker_dragged = true;
+      if (e->type == TouchEvent_Liftoff) {
+        picker_touched = false;
+        if (!picker_dragged && now_ms() - picker_time <= 350 && e->y >= 64 &&
+            e->y < 184) {
+          mode_choice = (e->y - 64) / 30;
+          button(HS_SELECT);
+        }
+      }
+    }
+    return;
+  }
+  if (app_mode != 2) {
+    int result = flat_touch(e, now_ms());
+    if (e->type == TouchEvent_Liftoff) {
+      cancel_frame();
+      record();
+      if (!save_failed && result == 2) {
+        window_stack_pop_all(false);
+        return;
+      }
+      if (!save_failed && result == 1) {
+        picker = true;
+        mode_choice = app_mode;
+      }
+      trace();
+      redraw();
+      if (!picker && flat_busy())
+        schedule();
+    } else
+      schedule();
+    return;
+  }
   int type = e->type == TouchEvent_Touchdown ? HS_TOUCH_DOWN
              : e->type == TouchEvent_Liftoff ? HS_TOUCH_UP
                                              : HS_TOUCH_MOVE;
@@ -355,12 +508,17 @@ static void touch(const TouchEvent *e, void *ctx) {
 }
 static void focus(bool active) {
   focused = active;
+  flat_cancel();
+  picker_touched = false;
   controller_cancel(&s);
   cancel_tap();
   cancel_frame();
   record();
-  if (active)
+  if (active) {
     redraw();
+    if (!picker && app_mode != 2 && flat_busy())
+      schedule();
+  }
 }
 static void load(Window *w) {
   Layer *root = window_get_root_layer(w);
@@ -380,10 +538,24 @@ static void load(Window *w) {
   }
   if (!restored)
     s.mode = HS_HELP;
+  chose_mode = restored || persist_exists(2);
+  if (persist_exists(2)) {
+    int mode = persist_read_int(2);
+    if (mode >= 0 && mode <= 2)
+      app_mode = mode;
+    else
+      chose_mode = false;
+  }
+  picker = !chose_mode;
+  mode_choice = app_mode;
+  if (app_mode != 2)
+    flat_init(app_mode, width, height);
   canvas = layer_create(bounds);
   layer_set_update_proc(canvas, draw);
   layer_add_child(root, canvas);
   trace();
+  if (!picker && app_mode != 2 && flat_busy())
+    schedule();
 }
 static void unload(Window *w) {
   layer_destroy(canvas);
