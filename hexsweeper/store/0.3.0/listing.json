@@ -1,0 +1,30 @@
+{
+  "name": "Hexsweeper Sphere",
+  "slug": "hexsweeper",
+  "version": "0.3.0",
+  "root": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper",
+  "pbw": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper/release/0.3.0/hexsweeper-sphere-0.3.0.pbw",
+  "pbwSHA256": "9faec166a8eb3ed9731d3b87feb31042d0515ab544b36c8c43e2c9dbf3b7a804",
+  "description": "Seven mines hide among 42 cells wrapped around a sphere. Drag to turn it, tap to aim, and press Select to dig. Hold Select to flag; Explore lets you travel with buttons alone. Dotted, inset tiles are covered; flat white tiles are open. Your first dig opens a safe patch.\n\nFor Pebble Time 2 and Round 2. Touch requires firmware 4.33.2; button controls remain available. By Luke Steuber.",
+  "category": "Games",
+  "visibility": "Unlisted",
+  "releaseState": "Draft",
+  "media": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper/store/0.3.0",
+  "primary": "01-gameplay.gif",
+  "targets": [
+    "emery",
+    "gabbro"
+  ],
+  "physicalValidation": "Not performed",
+  "gifStyle": "Sequence of unchanged native gameplay captures, 1300 ms per frame",
+  "nativeSources": {
+    "release/0.3.0/evidence/emery-ready.png": "34cb466db32b21ea1e3c9b62b14fb3d236ad0f8463da6e2ddf096f4eddf5396f",
+    "release/0.3.0/evidence/emery-first-dig.png": "e2f0251713edaea6de1797292c49153d1470210a6d4539452562154af850120c",
+    "release/0.3.0/evidence/emery-rotated.png": "bbfc32408721c91f4f41f53cedb901136fd8d9cead7f85eb379331a641db5d48",
+    "release/0.3.0/evidence/emery-touch-dig.png": "fe6bace2d34c95e01841ffcde541b63b18dd385fa6fe601ab349229802345ebd",
+    "release/0.3.0/evidence/gabbro-ready.png": "eea5effcb533d0046c49ba470c77961f0936c1d9651eebf6fcd0ecda3463eb7b",
+    "release/0.3.0/evidence/gabbro-first-dig.png": "23b5285f63556c697ae7b12885d719886538ac78d1dc191c894fc3b14ea38824",
+    "release/0.3.0/evidence/gabbro-rotated.png": "a4de22711fc5552f2598d75defe5fffa0c71f8ec5edd0143bcadb89ffdd48c73",
+    "release/0.3.0/evidence/gabbro-touch-dig.png": "97c0f76bd731d39c8fe5d80cf25e3af17201e5dba9f56c303b66d7ca4e8144eb"
+  }
+}

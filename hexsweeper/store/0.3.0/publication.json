@@ -1,0 +1,29 @@
+{
+  "name": "Hexsweeper Sphere",
+  "version": "0.3.0",
+  "appId": "94e4d9abfb8e44488f419862",
+  "dashboardURL": "https://developer.repebble.com/dashboard/apps/94e4d9abfb8e44488f419862/edit",
+  "appstoreURL": "https://apps.repebble.com/94e4d9abfb8e44488f419862",
+  "visibility": "Unlisted",
+  "releaseState": "Draft",
+  "verifiedAt": "2026-09-09T19:20:07.186821+00:00",
+  "pbwSHA256": "9faec166a8eb3ed9731d3b87feb31042d0515ab544b36c8c43e2c9dbf3b7a804",
+  "physicalValidation": "Not performed",
+  "icons": [
+    80,
+    144
+  ],
+  "media": {
+    "emery": {
+      "screenshots": 5,
+      "banner": 1,
+      "primaryGIF": "https://developer.repebble.com/api/assets/screenshots/94e4d9abfb8e44488f419862/emery/80e2d8ed-d95b-4fc0-9a8c-2a9b3027be96.gif"
+    },
+    "gabbro": {
+      "screenshots": 5,
+      "banner": 1,
+      "primaryGIF": "https://developer.repebble.com/api/assets/screenshots/94e4d9abfb8e44488f419862/gabbro/472915b8-1cb3-484c-893b-f05b76fc4d94.gif"
+    }
+  },
+  "verification": "Reopened both saved media panels; primary GIF URLs, five screenshots, banners, and draft/visibility states verified."
+}

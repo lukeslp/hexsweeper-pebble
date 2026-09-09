@@ -1,0 +1,31 @@
+{
+  "name": "Hexsweeper Flat",
+  "version": "0.1.0",
+  "appId": "c65f56180bd7458e90b1fbfe",
+  "dashboardURL": "https://developer.repebble.com/dashboard/apps/c65f56180bd7458e90b1fbfe/edit",
+  "appstoreURL": "https://apps.repebble.com/c65f56180bd7458e90b1fbfe",
+  "visibility": "Unlisted",
+  "releaseState": "Draft",
+  "verifiedAt": "2026-09-09T19:20:07.185547+00:00",
+  "pbwSHA256": "d263f2fcaacb13602d0ec924fda6f90a224b662f861c0ec717f66c1b239a89a4",
+  "physicalValidation": "Not performed",
+  "icons": [
+    80,
+    144
+  ],
+  "media": {
+    "emery": {
+      "screenshots": 5,
+      "banner": 1,
+      "primaryGIF": "https://developer.repebble.com/api/assets/screenshots/c65f56180bd7458e90b1fbfe/emery/6519555d-bd9b-4be0-bdd6-baa9432b462e.gif"
+    },
+    "gabbro": {
+      "screenshots": 5,
+      "banner": 1,
+      "primaryGIF": "https://developer.repebble.com/api/assets/screenshots/c65f56180bd7458e90b1fbfe/gabbro/b4074e45-1380-4346-828c-a30f514f584e.gif"
+    }
+  },
+  "verification": "Reopened both saved media panels; primary GIF URLs, five screenshots, banners, and draft/visibility states verified.",
+  "submissionIncident": "The portal initially auto-published this listing. The release was immediately changed to Draft and the listing to Unlisted; both corrected states were verified.",
+  "gifDownloadVerification": "Time 2 primary downloaded through authenticated browser: four frames, 200x228, exact uploaded SHA-256."
+}
