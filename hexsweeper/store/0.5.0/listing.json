@@ -1,0 +1,32 @@
+{
+  "name": "Hexsweeper",
+  "slug": "hexsweeper",
+  "version": "0.5.0",
+  "root": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper",
+  "pbw": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper/release/0.5.0/hexsweeper-0.5.0.pbw",
+  "pbwSHA256": "947fd9fffd916b63a11352e950c3f628e6868a3e07a15223d6be8376792e2178",
+  "description": "Classic, Infinite and 3D minesweeper in one watch app. Each mode keeps its own board, and reopening resumes where you left off.\n\nClassic has 37 cells and six mines: reveal all 31 safe cells to win. Hexsweeper 3D wraps 42 cells around a sphere, including twelve pentagons. Rotate it and uncover all 35 safe cells. Infinite lets you pan across a continuing hex field and build your safe-cell count, with no final board.\n\nNumbers count neighboring mines. Flag suspected mines, then select an open clue to chord when the neighboring flag count matches. Incorrect flags can lose the game. Your first dig and its neighbors are safe. Amber tiles and black pennants distinguish flags.\n\nTap to aim; Select digs and hold Select flags. Drag pans Infinite or rotates 3D. Every mode also works with buttons. Infinite retains 64 explored 8-by-8 chunks; it warns when history is full and preserves existing discoveries. No account or connection required.\n\nFor Pebble Time 2 and Round 2. Touch requires firmware 4.33.2; button controls remain available. By Luke Steuber.",
+  "category": "Games",
+  "visibility": "Unlisted",
+  "releaseState": "Draft",
+  "media": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper/store/0.5.0",
+  "primary": "01-gameplay.gif",
+  "targets": [
+    "emery",
+    "gabbro"
+  ],
+  "physicalValidation": "Not performed",
+  "gifStyle": "Sequence of unchanged native gameplay captures, 1300 ms per frame",
+  "nativeSources": {
+    "release/0.5.0/evidence/emery-classic.png": "c0c26a5d70de80d47b5066f40dfdfaa68f62da4b6aa40778217e6ea01af13728",
+    "release/0.5.0/evidence/emery-infinite-distant-flag.png": "88b0a330a716ff42a78c2bd0f2c7cd2bd1529c90010485da2492baa345c158f7",
+    "release/0.5.0/evidence/emery-infinite-resumed.png": "88b0a330a716ff42a78c2bd0f2c7cd2bd1529c90010485da2492baa345c158f7",
+    "release/0.5.0/evidence/emery-sphere-flag.png": "8d391d82b5b851f5ed9de88a29651ad23457d1cd3c809c720ac105120a2e72ca",
+    "release/0.5.0/evidence/emery-rotated.png": "c0784339ffb8ac27504a965e8c0ae1b6a9ec8d8a5cf4a9156a615c72a5528b92",
+    "release/0.5.0/evidence/gabbro-classic.png": "fffd6d98d8a842a65e81272a5ea1c522c28e248fb02f77f81500cd3525087c0a",
+    "release/0.5.0/evidence/gabbro-infinite-distant-flag.png": "376675178613b39e63dcf7d8cfd7f95c19aa36ade7f81ffb3529865a78c48a73",
+    "release/0.5.0/evidence/gabbro-infinite-resumed.png": "376675178613b39e63dcf7d8cfd7f95c19aa36ade7f81ffb3529865a78c48a73",
+    "release/0.5.0/evidence/gabbro-sphere-flag.png": "69581a61886271da65fee01d85aa81890f8dea783b130a8c3b4d6844aeec059b",
+    "release/0.5.0/evidence/gabbro-rotated.png": "fea834647bac7883d4df3a4da8a66a1953ff977a895aa8259760457487b28fab"
+  }
+}

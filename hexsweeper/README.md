@@ -1,6 +1,6 @@
 # Hexsweeper for Pebble
 
-The combined development build offers **Classic, Infinite, and 3D** in one app.
+Version **0.5.0** offers **Classic, Infinite, and 3D** in one app.
 Each mode keeps its own board. The first launch opens the mode picker; later
 launches resume the last mode. Choose Game modes from the pause menu to switch,
 or Save and exit from the picker to return to the watch.
@@ -28,7 +28,7 @@ revealed cells and pending flood expansion across interrupted saves.
 The combined app keeps the existing 3D UUID and save format. The old standalone
 Classic app has separate storage that this app cannot import. Archived releases
 and historical validation below describe the earlier standalone 3D app; the
-combined development build has not yet been packaged or uploaded.
+combined build is staged in `release/0.5.0/`; the store release remains a draft.
 
 A small sphere of 42 cells, with seven hidden mines. Drag it to turn it in your
 hand, or travel around it using the watch buttons. Built by Luke Steuber.
@@ -166,3 +166,5 @@ sizes. It does **not** prove physical touch accuracy, finger occlusion, outdoor
 readability, tactile controls, battery life or the target of 15 fps while dragging.
 Those checks remain open on a physical Time 2 and a physical Round 2. This is a
 locally staged testing build, not a published Pebble store release.
+
+Version 0.5.0 passes both the full 3D gameplay suite and combined-mode suite on both targets, with reports matching the exact PBW. Checks cover mode switching, independent flags/boards, distant Infinite exploration and exact last-mode resume. Core tests cover chording in every mode, signed coordinate seams, history exhaustion and interrupted snapshot recovery.

@@ -1,0 +1,28 @@
+{
+  "name": "Hexsweeper",
+  "version": "0.5.0",
+  "pbwSHA256": "947fd9fffd916b63a11352e950c3f628e6868a3e07a15223d6be8376792e2178",
+  "targets": [
+    "emery",
+    "gabbro"
+  ],
+  "appId": "94e4d9abfb8e44488f419862",
+  "visibility": "Unlisted",
+  "releaseState": "Draft",
+  "verifiedAt": "2026-09-09T22:47:31.303737+00:00",
+  "dashboardURL": "https://developer.repebble.com/dashboard/apps/94e4d9abfb8e44488f419862/edit",
+  "physicalValidation": "Not performed",
+  "verification": "Saved release and listing; reopened both target panels and verified five screenshots with GIF first. Local GIF frames match native capture pixels.",
+  "media": {
+    "emery": {
+      "screenshots": 5,
+      "banner": 1,
+      "primaryGIF": "https://developer.repebble.com/api/assets/screenshots/94e4d9abfb8e44488f419862/emery/2b0f0ca9-c20e-429f-88d6-d33da0220512.gif"
+    },
+    "gabbro": {
+      "screenshots": 5,
+      "banner": 1,
+      "primaryGIF": "https://developer.repebble.com/api/assets/screenshots/94e4d9abfb8e44488f419862/gabbro/fcb0f316-fccf-4bac-9388-689c23b028bd.gif"
+    }
+  }
+}
