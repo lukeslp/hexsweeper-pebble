@@ -1,0 +1,11 @@
+{
+  "name": "hexsweeper-flat",
+  "version": "0.1.0",
+  "uuid": "7e9b9f91-d51f-453f-9689-5f1204021963",
+  "pbwSHA256": "d263f2fcaacb13602d0ec924fda6f90a224b662f861c0ec717f66c1b239a89a4",
+  "validation": "Native emulators on firmware 4.33.2 only; physical watches unverified.",
+  "targets": [
+    "emery",
+    "gabbro"
+  ]
+}

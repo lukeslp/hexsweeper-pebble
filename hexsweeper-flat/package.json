@@ -1,0 +1,28 @@
+{
+  "name": "hexsweeper-flat",
+  "version": "0.1.0",
+  "author": "Luke Steuber",
+  "private": true,
+  "keywords": [
+    "pebble-app"
+  ],
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Hexsweeper Flat",
+    "companyName": "Luke Steuber",
+    "uuid": "7e9b9f91-d51f-453f-9689-5f1204021963",
+    "sdkVersion": "3",
+    "enableMultiJS": false,
+    "targetPlatforms": [
+      "emery",
+      "gabbro"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [],
+    "resources": {
+      "media": []
+    }
+  }
+}
