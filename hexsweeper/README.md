@@ -168,3 +168,5 @@ Those checks remain open on a physical Time 2 and a physical Round 2. This is a
 locally staged testing build, not a published Pebble store release.
 
 Version 0.5.0 passes both the full 3D gameplay suite and combined-mode suite on both targets, with reports matching the exact PBW. Checks cover mode switching, independent flags/boards, distant Infinite exploration and exact last-mode resume. Core tests cover chording in every mode, signed coordinate seams, history exhaustion and interrupted snapshot recovery.
+
+Supplemental 0.5.0 native checks pass on both targets: underflag no-op, correct and incorrect chording in all three modes, rotated 3D navigation, Infinite panning in all directions, 64-chunk capacity refusal, exact full-history resume, retained old flags and reclamation of empty flag-only chunks. Reports and captures are in `store/0.5.0/validation/`; these checks install the immutable release PBW using `test/native_chords.py`.
