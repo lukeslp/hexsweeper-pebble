@@ -5,7 +5,7 @@
   "root": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper-flat",
   "pbw": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper-flat/release/0.1.0/hexsweeper-flat-0.1.0.pbw",
   "pbwSHA256": "d263f2fcaacb13602d0ec924fda6f90a224b662f861c0ec717f66c1b239a89a4",
-  "description": "A pocket-sized minefield: 37 hexagons, six mines, and a safe first dig. Tap to aim, press Select to dig, or hold Select to flag. Buttons can reach every cell. Covered tiles have dots; opened tiles show nearby mine counts. Random boards may require a guess.\n\nFor Pebble Time 2 and Round 2. Touch requires firmware 4.33.2; button controls remain available. By Luke Steuber.",
+  "description": "Thirty-seven hexagons. Six hidden mines. Clear the board one careful dig at a time. Your first dig is safe, though later moves may leave you guessing.\n\nTap a tile to select it, then press Select to dig. Hold Select to place a flag. You can reach every tile with the buttons, too. Dots mark covered tiles; numbers count the mines next door.\n\nFor Pebble Time 2 and Pebble Round 2. Touch controls require firmware 4.33.2 or later. Every action also works with buttons.\n\nBy Luke Steuber.",
   "category": "Games",
   "visibility": "Unlisted",
   "releaseState": "Draft",
@@ -26,5 +26,6 @@
     "release/0.1.0/gabbro-flag.png": "2c6c7a2308d6dc3e177d16feb56596d32b2e994200a72c03ee889c0f79842239",
     "release/0.1.0/gabbro-opened.png": "0d821b4d0edf5cdb297ca92625d5a2eb7669dd8958c3091f335b6efa49794e93",
     "release/0.1.0/gabbro-won.png": "9e76a89161711f682adb62da687c7013a0da0e34a8df86418a410d565e1b6e07"
-  }
+  },
+  "releaseNotes": "The first watch version has a flat hexagonal board, a safe first dig, flags, and saved games on the watch."
 }

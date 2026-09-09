@@ -25,5 +25,12 @@
       "primaryGIF": "https://developer.repebble.com/api/assets/screenshots/94e4d9abfb8e44488f419862/gabbro/472915b8-1cb3-484c-893b-f05b76fc4d94.gif"
     }
   },
-  "verification": "Reopened both saved media panels; primary GIF URLs, five screenshots, banners, and draft/visibility states verified."
+  "verification": "Reopened both saved media panels; primary GIF URLs, five screenshots, banners, and draft/visibility states verified.",
+  "copyRevision": {
+    "verifiedAt": "2026-09-09T20:08:31.317Z",
+    "description": "Saved and reopened",
+    "releaseNotes": "Dots and inset outlines make covered cells easier to spot. Open cells keep the same fill as you rotate the sphere.",
+    "visibility": "Unlisted",
+    "releaseState": "Draft"
+  }
 }

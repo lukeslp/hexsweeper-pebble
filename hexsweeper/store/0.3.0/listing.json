@@ -5,7 +5,7 @@
   "root": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper",
   "pbw": "/Users/luke/workspace/hexsweeper/appstores/pebble/hexsweeper/release/0.3.0/hexsweeper-sphere-0.3.0.pbw",
   "pbwSHA256": "9faec166a8eb3ed9731d3b87feb31042d0515ab544b36c8c43e2c9dbf3b7a804",
-  "description": "Seven mines hide among 42 cells wrapped around a sphere. Drag to turn it, tap to aim, and press Select to dig. Hold Select to flag; Explore lets you travel with buttons alone. Dotted, inset tiles are covered; flat white tiles are open. Your first dig opens a safe patch.\n\nFor Pebble Time 2 and Round 2. Touch requires firmware 4.33.2; button controls remain available. By Luke Steuber.",
+  "description": "Minesweeper wraps around a tiny world. Search 42 cells for seven hidden mines, turning the sphere to see what lies beyond the edge. Your first dig opens a safe patch.\n\nDrag to turn, tap a cell to select it, then press Select to dig. Hold Select to place a flag. Use Explore to move around with buttons alone. Dotted, inset tiles mark covered ground; flat white tiles show where you have dug.\n\nFor Pebble Time 2 and Pebble Round 2. Touch controls require firmware 4.33.2 or later. Every action also works with buttons.\n\nBy Luke Steuber.",
   "category": "Games",
   "visibility": "Unlisted",
   "releaseState": "Draft",
@@ -26,5 +26,6 @@
     "release/0.3.0/evidence/gabbro-first-dig.png": "23b5285f63556c697ae7b12885d719886538ac78d1dc191c894fc3b14ea38824",
     "release/0.3.0/evidence/gabbro-rotated.png": "a4de22711fc5552f2598d75defe5fffa0c71f8ec5edd0143bcadb89ffdd48c73",
     "release/0.3.0/evidence/gabbro-touch-dig.png": "97c0f76bd731d39c8fe5d80cf25e3af17201e5dba9f56c303b66d7ca4e8144eb"
-  }
+  },
+  "releaseNotes": "Dots and inset outlines make covered cells easier to spot. Open cells keep the same fill as you rotate the sphere."
 }

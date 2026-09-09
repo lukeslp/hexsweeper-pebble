@@ -27,5 +27,12 @@
   },
   "verification": "Reopened both saved media panels; primary GIF URLs, five screenshots, banners, and draft/visibility states verified.",
   "submissionIncident": "The portal initially auto-published this listing. The release was immediately changed to Draft and the listing to Unlisted; both corrected states were verified.",
-  "gifDownloadVerification": "Time 2 primary downloaded through authenticated browser: four frames, 200x228, exact uploaded SHA-256."
+  "gifDownloadVerification": "Time 2 primary downloaded through authenticated browser: four frames, 200x228, exact uploaded SHA-256.",
+  "copyRevision": {
+    "verifiedAt": "2026-09-09T20:08:31.317Z",
+    "description": "Saved and reopened",
+    "releaseNotes": "The first watch version has a flat hexagonal board, a safe first dig, flags, and saved games on the watch.",
+    "visibility": "Unlisted",
+    "releaseState": "Draft"
+  }
 }
