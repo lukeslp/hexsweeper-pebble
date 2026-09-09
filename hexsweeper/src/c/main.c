@@ -130,11 +130,7 @@ static void board(GContext *ctx) {
       path.num_points = (uint32_t)poly.count;
       bool open = (s.game.cells[i] & HS_OPEN) != 0;
       bool mine = (s.game.cells[i] & HS_MINE) != 0 && s.game.status == HS_LOST;
-      GColor fill = mine ? GColorMelon
-                    : open
-                        ? (poly.center.z > .75f ? GColorWhite : GColorLightGray)
-                    : poly.center.z > .75f ? GColorDarkGray
-                                           : GColorBlack;
+      GColor fill = mine ? GColorMelon : open ? GColorWhite : GColorDarkGray;
       if (pass == 0) {
         graphics_context_set_fill_color(ctx, fill);
         gpath_draw_filled(ctx, &path);
@@ -143,6 +139,18 @@ static void board(GContext *ctx) {
                                                        : GColorLightGray);
       graphics_context_set_stroke_width(ctx, pass == 1 ? 3 : 1);
       gpath_draw_outline(ctx, &path);
+      if (pass == 0 && !open && !mine && poly.center.z >= .6f) {
+        // Inset polygon gives covered cells a raised shape independent of hue.
+        int cx = round_coord(s.viewport.x + s.viewport.r * poly.center.x);
+        int cy = round_coord(s.viewport.y - s.viewport.r * poly.center.y);
+        GPoint inset[8];
+        for (int j = 0; j < poly.count; j++)
+          inset[j] = GPoint(cx + (points[j].x - cx) * 3 / 4,
+                            cy + (points[j].y - cy) * 3 / 4);
+        GPath rim = {.num_points = poly.count, .points = inset};
+        graphics_context_set_stroke_color(ctx, GColorLightGray);
+        gpath_draw_outline(ctx, &rim);
+      }
       if (pass == 1 || poly.center.z < .6f)
         continue;
       int x = (int)round_coord(s.viewport.x + s.viewport.r * poly.center.x),
@@ -151,7 +159,14 @@ static void board(GContext *ctx) {
         mine_symbol(ctx, x, y);
       else if (s.game.cells[i] & HS_FLAG)
         flag_symbol(ctx, x, y, GColorChromeYellow);
-      else if (open) {
+      else if (!open) {
+        // Sparse covered-cell texture; projected rim facets stay uncluttered.
+        graphics_context_set_stroke_color(ctx, GColorLightGray);
+        graphics_context_set_stroke_width(ctx, 1);
+        for (int dx = -4; dx <= 4; dx += 4)
+          for (int dy = -4; dy <= 4; dy += 4)
+            graphics_draw_pixel(ctx, GPoint(x + dx, y + dy));
+      } else if (open) {
         int count = game_clue(&s.game, i);
         if (count) {
           char n[2] = {(char)('0' + count), 0};
