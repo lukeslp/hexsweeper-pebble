@@ -546,7 +546,8 @@ static void load(Window *w) {
     else
       chose_mode = false;
   }
-  picker = !chose_mode;
+  // Always offer a mode; the last mode remains highlighted and saved.
+  picker = true;
   mode_choice = app_mode;
   if (app_mode != 2)
     flat_init(app_mode, width, height);

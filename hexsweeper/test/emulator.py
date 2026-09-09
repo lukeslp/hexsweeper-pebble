@@ -165,6 +165,7 @@ def run(platform):
         time.sleep(.4)
         watch.send_packet(AppRunState(data=AppRunStateStart(uuid=APP)))
         response(previous)
+        button('Select')  # Launch picker keeps 3D highlighted; resume its board.
     mesh = json.loads(subprocess.check_output(['node', '-e',
         "console.log(JSON.stringify(require('./sphere/hexasphere.js').generateHexasphere(1,2).tiles.map(t=>t.neighborIndices)))"], cwd=ROOT.parents[2]))
     def mines_for(seed, first):

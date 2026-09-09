@@ -1,0 +1,12 @@
+{
+  "name": "Hexsweeper",
+  "version": "0.6.0",
+  "author": "Luke Steuber",
+  "uuid": "f42b810c-aef1-4937-bf01-5e36d5f29407",
+  "pbwSHA256": "7d554efce6872c39b2d4bb909d28b1e0d755a6add0cf59a57426b9cd24dd2306",
+  "targets": [
+    "emery",
+    "gabbro"
+  ],
+  "evidence": "Native emulator; physical-watch checks remain open."
+}

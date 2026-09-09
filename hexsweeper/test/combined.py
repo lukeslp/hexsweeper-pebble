@@ -198,6 +198,9 @@ def run(platform):
         time.sleep(.5)
         watch.send_packet(AppRunState(data=AppRunStateStart(uuid=APP)))
         time.sleep(.8)
+        expect(app=1,picker=1,choice=1)
+        grab('launch-mode-choice')
+        choose(1)
         expect(app=1,picker=0,q=before['q'],r=before['r'],flags=1,open=before['open'])
         grab('infinite-resumed')
         modes();choose(0);expect(open=classic['open'],flags=classic['flags'],ui=0)
@@ -208,7 +211,7 @@ def run(platform):
         report={'platform':platform,'sdk':SDK_VERSION,'pbwSHA256':installed_sha,'passed':True,
                 'checks':['three-mode picker','classic first dig and flag','infinite safe opening',
                           'button exploration beyond viewport','distant flag','drag pan and return',
-                          'independent sphere flag','per-mode saves','last-mode automatic resume'],
+                          'independent sphere flag','per-mode saves','launch picker highlights last mode and preserves exact save'],
                 'frames':frames,'logs':logs}
         (out/f'{platform}-report.json').write_text(json.dumps(report,indent=2))
         print('PASS combined',platform)

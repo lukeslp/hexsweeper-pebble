@@ -1,8 +1,8 @@
 # Hexsweeper for Pebble
 
-Version **0.5.0** offers **Classic, Infinite, and 3D** in one app.
-Each mode keeps its own board. The first launch opens the mode picker; later
-launches resume the last mode. Choose Game modes from the pause menu to switch,
+Version **0.6.0** offers **Classic, Infinite, and 3D** in one app.
+Each mode keeps its own board. Every launch opens the mode picker with the last mode highlighted.
+Selecting a mode resumes its saved board. Choose Game modes from the pause menu to switch,
 or Save and exit from the picker to return to the watch.
 
 | Mode | Board and objective |
@@ -28,7 +28,7 @@ revealed cells and pending flood expansion across interrupted saves.
 The combined app keeps the existing 3D UUID and save format. The old standalone
 Classic app has separate storage that this app cannot import. Archived releases
 and historical validation below describe the earlier standalone 3D app; the
-combined build is staged in `release/0.5.0/`; the store release remains a draft.
+current build is staged in `release/0.6.0/`. The earlier 0.5.0 store release remains a draft.
 
 A small sphere of 42 cells, with seven hidden mines. Drag it to turn it in your
 hand, or travel around it using the watch buttons. Built by Luke Steuber.
@@ -170,3 +170,5 @@ locally staged testing build, not a published Pebble store release.
 Version 0.5.0 passes both the full 3D gameplay suite and combined-mode suite on both targets, with reports matching the exact PBW. Checks cover mode switching, independent flags/boards, distant Infinite exploration and exact last-mode resume. Core tests cover chording in every mode, signed coordinate seams, history exhaustion and interrupted snapshot recovery.
 
 Supplemental 0.5.0 native checks pass on both targets: underflag no-op, correct and incorrect chording in all three modes, rotated 3D navigation, Infinite panning in all directions, 64-chunk capacity refusal, exact full-history resume, retained old flags and reclamation of empty flag-only chunks. Reports and captures are in `store/0.5.0/validation/`; these checks install the immutable release PBW using `test/native_chords.py`.
+
+Version 0.6.0 opens the mode picker on every launch, highlights the last mode, and resumes that mode only after selection. Combined-mode and full 3D native suites pass on both targets against the new PBW, including saved-board preservation through the launch picker.
