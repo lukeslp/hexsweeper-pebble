@@ -128,8 +128,9 @@ static void board(GContext *ctx) {
   Polygon poly;
   GPoint points[8];
   GPath path = {.points = points};
-  int order[HS_CELLS];
-  float depth[HS_CELLS];
+  // Rendering is synchronous; keep sorting scratch off the graphics call stack.
+  static int order[HS_CELLS];
+  static float depth[HS_CELLS];
   for (int i = 0; i < HS_CELLS; i++) {
     order[i] = i;
     depth[i] = sphere_rotate(s.orientation, sphere_center(i)).z;

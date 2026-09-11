@@ -36,7 +36,9 @@ bool inf_store(const InfIO *io, const Infinite *g) {
   if (!inf_valid(g))
     return false;
   int bank = selected(io) ^ 1;
-  Infinite previous;
+  // Persistence runs synchronously on the app event loop. Keep the full world
+  // off the small watch stack; this scratch storage makes saving non-reentrant.
+  static Infinite previous;
   if (!bank_load(io, bank ^ 1, &previous) && bank_load(io, bank, &previous)) {
     int32_t fallback = bank;
     if (io->write(30, &fallback, sizeof fallback) != sizeof fallback)

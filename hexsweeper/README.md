@@ -1,9 +1,15 @@
 # Hexsweeper for Pebble
 
-Version **0.6.0** offers **Classic, Infinite, and 3D** in one app.
+Version **0.6.1** offers **Classic, Infinite, and 3D** in one app.
 Each mode keeps its own board. Every launch opens the mode picker with the last mode highlighted.
 Selecting a mode resumes its saved board. Choose Game modes from the pause menu to switch,
 or Save and exit from the picker to return to the watch.
+
+Version 0.6.1 keeps Infinite-mode save recovery off the small watch stack. The
+previous save frame used 1,632 bytes before calling persistence; it now uses
+56 bytes. Sphere-render sorting arrays also use fixed scratch storage. Native builds reject application frames larger than 512 bytes.
+The world format, UUID and game rules are unchanged. Physical-watch validation
+remains separate from emulator and compiler checks.
 
 | Mode | Board and objective |
 | --- | --- |
