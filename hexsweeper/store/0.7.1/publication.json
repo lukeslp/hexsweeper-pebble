@@ -1,0 +1,50 @@
+{
+  "title": "Minesweeper Hex",
+  "slug": "hexsweeper",
+  "version": "0.7.1",
+  "pbw": "appstores/pebble/hexsweeper/release/0.7.1/hexsweeper-0.7.1.pbw",
+  "pbwSHA256": "55b4659576771e93531759d7d24c2beb2dde14f3b70f9acab6bb49d446345944",
+  "uuid": "f42b810c-aef1-4937-bf01-5e36d5f29407",
+  "targets": [
+    "emery",
+    "gabbro"
+  ],
+  "release": "appstores/pebble/hexsweeper/release/0.7.1",
+  "appId": "94e4d9abfb8e44488f419862",
+  "media": "appstores/pebble/hexsweeper/store/0.7.1",
+  "releaseNotes": "Larger boards, clues and flags improve readability across Classic, Infinite and 3D. This update also fixes tap timing and adds About to each mode.",
+  "sources": {
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/emery-classic.png": "8c3f690dc1643b8bac7267f4a875b057f13f60426be0fedba65e0840bd15b1d2",
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/emery-touch-dig.png": "ef45fe2e95b8816ec8e77d3976bd82d8295a42698c6711741f89967a5bb39648",
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/emery-sphere-flag.png": "b760878728dbe4fcf2cf188580417936dcf80f83fa965c2555f3adcc2bc90cc2",
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/emery-infinite-distant-flag.png": "e6506cc06e56978aa6868639edad574188b041089de0b969f750921bd2774891",
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/emery-sphere-about.png": "763287346f6fc93f672f490f4b3d0fccd90e824a6f0de529963287bd1060e787",
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/gabbro-classic.png": "45c2bf2c0051ee738a6cbfc4d86abb7f92c0c8d55df0833c60b3dfb11e574247",
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/gabbro-touch-dig.png": "94136374e075c16d740243df0aefa95c1cecf209f15c65dd4c61341e0dd29e3f",
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/gabbro-sphere-flag.png": "15bc0e4bbf90ed0b63f1d7f6e0ec34ac13d1b60089df5d6f14a39ff558ad2305",
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/gabbro-infinite-distant-flag.png": "3dd1d194b22bc9a68bf7bcb906c24af572b99fa88ec86fe382a84eefda59e8d2",
+    "appstores/pebble/hexsweeper/release/0.7.1/evidence/gabbro-sphere-about.png": "cd9d8377d2163ca919676ca1a679cb3d4559f719068213b7cf8b684c10ca3cd3"
+  },
+  "appstoreURL": "https://apps.repebble.com/94e4d9abfb8e44488f419862",
+  "pbwDownloadURL": "https://appstore-api.repebble.com/api/assets/pbw/94e4d9abfb8e44488f419862/0.7.1/b4ec5a37-8ef3-4f3b-9776-e096a6e52906.pbw",
+  "publicDownloadSHA256": "55b4659576771e93531759d7d24c2beb2dde14f3b70f9acab6bb49d446345944",
+  "verifiedAt": "2026-09-11T06:56:01.168561+00:00",
+  "visibility": "Published",
+  "releaseState": "Published",
+  "physicalValidation": "Not performed; exact packages passed native emulator checks on both targets.",
+  "savedMedia": {
+    "emery": {
+      "screenshots": 5,
+      "primaryGIF": "https://developer.repebble.com/api/assets/screenshots/94e4d9abfb8e44488f419862/emery/fae84968-be0e-4782-a25a-b8159a2e1b92.gif",
+      "banner": "https://developer.repebble.com/api/assets/banners/94e4d9abfb8e44488f419862/emery/32795bec-2e30-43bd-8e34-359e107f78d7.png"
+    },
+    "gabbro": {
+      "screenshots": 5,
+      "primaryGIF": "https://developer.repebble.com/api/assets/screenshots/94e4d9abfb8e44488f419862/gabbro/b9fdc525-be3a-4102-b41c-4ca3f9a0f3ef.gif",
+      "banner": "https://developer.repebble.com/api/assets/banners/94e4d9abfb8e44488f419862/gabbro/d58bf25e-1749-48c9-9191-28f0b5002043.png"
+    }
+  },
+  "mediaVerification": "Reopened both saved target panels: five screenshots with a primary GIF and one banner per watch. GIF frames match unchanged native captures pixel for pixel.",
+  "descriptionChanges": "Owner title and description preserved.",
+  "physicalWatchValidated": false
+}

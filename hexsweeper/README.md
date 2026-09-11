@@ -48,7 +48,10 @@ revealed cells and pending flood expansion across interrupted saves.
 The combined app keeps the existing 3D UUID and save format. The old standalone
 Classic app has separate storage that this app cannot import. Archived releases
 and historical validation below describe the earlier standalone 3D app; the
-current candidate is staged in `release/0.7.1/`. The earlier 0.5.0 store release remains a draft.
+current release is in `release/0.7.1/` and is public as
+[Minesweeper Hex](https://apps.repebble.com/94e4d9abfb8e44488f419862).
+The separate old Classic listing was not recreated; Classic remains available
+inside the combined app.
 
 A small sphere of 42 cells, with seven hidden mines. Drag it to turn it in your
 hand, or travel around it using the watch buttons. Built by Luke Steuber.
@@ -184,7 +187,7 @@ has no warnings. Exact PBW hashes and native captures accompany the staged bundl
 The native emulator proves software behavior and screenshots at both display
 sizes. It does **not** prove physical touch accuracy, finger occlusion, outdoor
 readability, tactile controls, battery life or the target of 15 fps while dragging.
-Those checks remain open on a physical Time 2 and a physical Round 2. Version 0.7.1 is a locally staged candidate; the previously published build remains available.
+Those checks remain open on a physical Time 2 and a physical Round 2. Version 0.7.1 is public, and its Store download matches the frozen PBW. Both target media panels contain updated native captures. See the [publication receipt](store/0.7.1/publication.json).
 
 Version 0.5.0 passes both the full 3D gameplay suite and combined-mode suite on both targets, with reports matching the exact PBW. Checks cover mode switching, independent flags/boards, distant Infinite exploration and exact last-mode resume. Core tests cover chording in every mode, signed coordinate seams, history exhaustion and interrupted snapshot recovery.
 
