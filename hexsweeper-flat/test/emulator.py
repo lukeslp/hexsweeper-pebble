@@ -225,6 +225,30 @@ def run(platform):
         assert current()["opened"] >= 7
         grab("opened")
         before = current()
+        button("Back")
+        for _ in range(3): button("Down")
+        expect(screen=1,menu=3)
+        grab("about-menu")
+        button("Select");expect(screen=4,menu=3)
+        grab("about")
+        button("Down");expect(screen=4,menu=3)
+        button("Select");expect(screen=1,menu=3)
+        button("Select");expect(screen=4)
+        button("Back");expect(screen=1,menu=3)
+        touch([(width//2,54+3*38+19)]);expect(screen=4)
+        touch([(width//2,100)]);expect(screen=1,menu=3)
+        time.sleep(.3);expect(screen=1,menu=3)
+        button("Select");expect(screen=4)
+        pointer(width//2,100,True);time.sleep(.05)
+        button("Back");expect(screen=1,menu=3)
+        pointer(width//2,100,False);time.sleep(.3)
+        expect(screen=1,menu=3)
+        button("Down");expect(menu=4)
+        grab("menu-last")
+        touch([(width//2,54+2*38+19)]);expect(screen=4)
+        button("Back");expect(screen=1,menu=3)
+        button("Back");expect(screen=0)
+        expect(**{k:before[k] for k in ('selected','opened','flags','status','seed')})
         watch.send_packet(AppRunState(data=AppRunStateStop(uuid=APP)))
         time.sleep(0.5)
         watch.send_packet(AppRunState(data=AppRunStateStart(uuid=APP)))
@@ -283,6 +307,7 @@ def run(platform):
             "pbwSHA256": installed_sha,
             "passed": True,
             "checks": [
+                "About portrait, same-menu Select/Back/tap return, held-contact isolation and unchanged save",
                 "launch",
                 "help",
                 "flag protects covered cell",

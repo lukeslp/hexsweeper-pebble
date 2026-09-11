@@ -33,7 +33,7 @@ with zipfile.ZipFile(
         if (
             path.is_file()
             and (
-                rel.parts[0] in ("src", "test", "tools")
+                rel.parts[0] in ("src", "test", "tools", "resources")
                 or str(rel) in ("package.json", "wscript", "README.md", ".gitignore")
             )
             and "__pycache__" not in rel.parts

@@ -174,10 +174,10 @@ void flat_draw(GContext *c) {
   if (ui == 2) {
     text(c, kind ? "INFINITE" : "CLASSIC", 8, 36, true);
     const char *items[] = {"Resume", "Controls", "New board", "Game modes",
-                           "Save and exit"};
-    for (int i = menu_first(); i < 5 && i < menu_first() + 4; i++)
+                           "About", "Save and exit"};
+    for (int i = menu_first(); i < 6 && i < menu_first() + 4; i++)
       row(c, items[i], 48 + (i - menu_first()) * UI_ROW_HEIGHT, menu == i);
-    snprintf(b, sizeof b, "%d/5", menu + 1);
+    snprintf(b, sizeof b, "%d/6", menu + 1);
     compact(c, b, h - 26);
     return;
   }
@@ -270,9 +270,9 @@ int flat_button(int b) {
     if (b == HS_BACK)
       ui = 0;
     else if (b == HS_UP)
-      menu = (menu + 4) % 5;
+      menu = (menu + 5) % 6;
     else if (b == HS_DOWN)
-      menu = (menu + 1) % 5;
+      menu = (menu + 1) % 6;
     else if (b == HS_SELECT) {
       if (menu == 0)
         ui = 0;
@@ -283,7 +283,7 @@ int flat_button(int b) {
         ui = 4;
         menu = 0;
       } else
-        return menu == 3 ? 1 : 2;
+        return menu == 3 ? 1 : menu == 4 ? 3 : 2;
     }
     return 0;
   }
@@ -429,13 +429,13 @@ void flat_trace(void) {
   if (kind) APP_LOG(APP_LOG_LEVEL_INFO,"HF storage chunks=%d full=%d cell=%d",world.count,world.full,inf_state(&world,world.focus));
   if (kind)
     APP_LOG(APP_LOG_LEVEL_INFO,
-            "HF kind=1 ui=%d q=%ld r=%ld status=%d open=%lu flags=%lu busy=%d",
-            ui, (long)world.focus.q, (long)world.focus.r, world.status,
+            "HF kind=1 ui=%d menu=%d q=%ld r=%ld status=%d open=%lu flags=%lu busy=%d",
+            ui, menu, (long)world.focus.q, (long)world.focus.r, world.status,
             (unsigned long)world.opened, (unsigned long)world.flagged,
             world.busy);
   else
     APP_LOG(APP_LOG_LEVEL_INFO,
-            "HF kind=0 ui=%d selected=%d status=%d open=%d flags=%d", ui,
+            "HF kind=0 ui=%d menu=%d selected=%d status=%d open=%d flags=%d", ui, menu,
             selected, finite.status, classic_open_count(&finite),
             classic_flag_count(&finite));
 }

@@ -1,6 +1,6 @@
 {
   "name": "hexsweeper",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "author": "Luke Steuber",
   "private": true,
   "keywords": [
@@ -28,6 +28,11 @@
           "name": "IMAGE_MENU_ICON",
           "file": "data/menu-icon.png",
           "menuIcon": true
+        },
+        {
+          "type": "bitmap",
+          "name": "ABOUT_PORTRAIT",
+          "file": "images/about-portrait.png"
         }
       ]
     }

@@ -66,9 +66,9 @@ void controller_button(Controller *c, int button) {
     }
   } else if (c->mode == HS_PAUSE) {
     if (button == HS_UP)
-      c->menu = (c->menu + 4) % 5;
+      c->menu = (c->menu + 5) % 6;
     else if (button == HS_DOWN)
-      c->menu = (c->menu + 1) % 5;
+      c->menu = (c->menu + 1) % 6;
     else if (button == HS_BACK)
       c->mode = HS_PLAY;
     else if (button == HS_SELECT) {
@@ -83,7 +83,7 @@ void controller_button(Controller *c, int button) {
         c->mode = HS_CONFIRM;
         c->menu = 0;
       }
-      // Menu item 4 is handled by the native shell after saving.
+      // Game modes (4) and About (5) are handled by the native shell.
     }
   } else if (c->mode == HS_HELP) {
     if (button == HS_UP)

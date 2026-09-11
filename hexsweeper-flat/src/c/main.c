@@ -1,6 +1,7 @@
 // Flat Hexsweeper. Luke Steuber.
 #include "game.h"
 #include "geometry.h"
+#include "about.h"
 #include <pebble.h>
 #include "ui_style.h"
 static Game g;
@@ -9,6 +10,8 @@ static Layer *layer;
 static int w, h, selected = 18, screen = 2, menu, sx, sy;
 static bool touching, moved, focused = true, touch_on, save_failed;
 static AppTimer *timer;
+static void cancel(void);
+static int menu_first(void) { return menu > 3 ? menu - 3 : 0; }
 typedef struct {
   uint32_t magic;
   Game game;
@@ -82,6 +85,10 @@ static void draw(Layer *l, GContext *c) {
   graphics_context_set_fill_color(c, GColorBlack);
   graphics_fill_rect(c, GRect(0, 0, w, h), 0, GCornerNone);
   char b[64];
+  if (screen == 4) {
+    about_draw(c, w);
+    return;
+  }
   if (screen == 2) {
     text(c, "HEXSWEEPER", 18, 36, true);
     text(c,
@@ -93,9 +100,9 @@ static void draw(Layer *l, GContext *c) {
   if (screen == 1) {
     text(c, "HEXSWEEPER", 12, 36, true);
     const char *items[] = {"Resume", "How to play", "New board",
-                           "Save and exit"};
-    for (int i = 0; i < 4; i++)
-      row(c, items[i], 54 + i * UI_ROW_HEIGHT, menu == i);
+                           "About", "Save and exit"};
+    for (int i = menu_first(); i < 5 && i < menu_first() + 4; i++)
+      row(c, items[i], 54 + (i - menu_first()) * UI_ROW_HEIGHT, menu == i);
     return;
   }
   if (screen == 3) {
@@ -182,13 +189,19 @@ static void draw(Layer *l, GContext *c) {
 }
 static void refresh(void) {
   APP_LOG(APP_LOG_LEVEL_INFO,
-          "HF screen=%d selected=%d status=%d opened=%d flags=%d seed=%lu",
-          screen, selected, g.status, game_open_count(&g), game_flag_count(&g),
+          "HF screen=%d menu=%d selected=%d status=%d opened=%d flags=%d seed=%lu",
+          screen, menu, selected, g.status, game_open_count(&g), game_flag_count(&g),
           (unsigned long)g.seed);
   layer_mark_dirty(layer);
 }
 static void action(int b) {
-  if (screen == 2) {
+  if (screen == 4) {
+    if (b == 1 || b == 3) {
+      cancel();
+      about_close();
+      screen = 1;
+    }
+  } else if (screen == 2) {
     screen = 0;
   } else if (screen == 3) {
     if (b == 3)
@@ -207,9 +220,9 @@ static void action(int b) {
     if (b == 3)
       screen = 0;
     else if (b == 0)
-      menu = (menu + 3) % 4;
+      menu = (menu + 4) % 5;
     else if (b == 2)
-      menu = (menu + 1) % 4;
+      menu = (menu + 1) % 5;
     else if (menu == 0)
       screen = 0;
     else if (menu == 1)
@@ -217,6 +230,10 @@ static void action(int b) {
     else if (menu == 2) {
       screen = 3;
       menu = 0;
+    } else if (menu == 3) {
+      cancel();
+      about_open();
+      screen = 4;
     } else {
       save();
       if (!save_failed) {
@@ -270,6 +287,10 @@ static void expire(void *x) {
 static void touch(const TouchEvent *e, void *x) {
   if (!focused)
     return;
+  if (e->non_navigational) {
+    cancel();
+    return;
+  }
   if (e->type == TouchEvent_Touchdown) {
     cancel();
     sx = e->x;
@@ -277,6 +298,8 @@ static void touch(const TouchEvent *e, void *x) {
     moved = false;
     touching = true;
     timer = app_timer_register(350, expire, NULL);
+    if (!timer)
+      touching = false;
   } else if (e->type == TouchEvent_PositionUpdate) {
     if (abs(e->x - sx) > 8 || abs(e->y - sy) > 8)
       moved = true;
@@ -300,10 +323,10 @@ static void touch(const TouchEvent *e, void *x) {
         save();
         refresh();
       }
-    } else if (screen == 2)
+    } else if (screen == 2 || screen == 4)
       action(1);
     else if (screen == 1 && sy >= 54 && sy < 54 + 4 * UI_ROW_HEIGHT) {
-      menu = (sy - 54) / UI_ROW_HEIGHT;
+      menu = menu_first() + (sy - 54) / UI_ROW_HEIGHT;
       action(1);
     } else if (screen == 3 && sy >= 112 && sy < 150 + UI_ROW_HEIGHT) {
       menu = sy >= 150;
@@ -326,7 +349,11 @@ static void load(Window *x) {
   layer_add_child(window_get_root_layer(x), layer);
   refresh();
 }
-static void unload(Window *x) { layer_destroy(layer); }
+static void unload(Window *x) {
+  about_close();
+  layer_destroy(layer);
+  layer = NULL;
+}
 int main(void) {
   if (restore())
     screen = 0;

@@ -1,6 +1,6 @@
 {
   "name": "hexsweeper-flat",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "Luke Steuber",
   "private": true,
   "keywords": [
@@ -22,7 +22,13 @@
     },
     "messageKeys": [],
     "resources": {
-      "media": []
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "ABOUT_PORTRAIT",
+          "file": "images/about-portrait.png"
+        }
+      ]
     }
   }
 }

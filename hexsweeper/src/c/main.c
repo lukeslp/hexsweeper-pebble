@@ -2,6 +2,7 @@
 #include "compat.h"
 #include "controller.h"
 #include "flat.h"
+#include "about.h"
 #include "ui_style.h"
 #include <math.h>
 #include <pebble.h>
@@ -14,7 +15,7 @@ static AppTimer *tap_timer;
 static uint32_t gesture_clock;
 static uint32_t last_frame;
 static bool focused = true, save_failed;
-static bool touch_ready;
+static bool touch_ready, showing_about;
 static int width, height;
 static int app_mode = 2, mode_choice;
 static bool picker, chose_mode, picker_touched, picker_dragged;
@@ -46,8 +47,8 @@ static void record(void) {
     save_failed = persist_write_int(2, app_mode) != sizeof(int32_t);
 }
 static void trace(void) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "HX app=%d picker=%d choice=%d", app_mode, picker,
-          mode_choice);
+  APP_LOG(APP_LOG_LEVEL_INFO, "HX app=%d picker=%d choice=%d about=%d", app_mode, picker,
+          mode_choice, showing_about);
   if (app_mode != 2) {
     flat_trace();
     return;
@@ -273,13 +274,13 @@ static void menu(GContext *ctx) {
          fonts_get_system_font(UI_FONT_SMALL), GColorWhite);
     return;
   }
-  const char *items[5] = {"Resume",
+  const char *items[6] = {"Resume",
                           s.direct ? "Direct taps: on" : "Direct taps: off",
-                          "Controls", "New game", "Game modes"};
+                          "Controls", "New game", "Game modes", "About"};
   if (!touch_ready)
     items[1] = "Touch: update watch";
   const char *confirm[2] = {"Keep playing", "Replace game"};
-  int count = s.mode == HS_CONFIRM ? 2 : 5;
+  int count = s.mode == HS_CONFIRM ? 2 : 6;
   if (s.mode == HS_CONFIRM)
     text(ctx, "Replace this board?", GRect(inset, 68, w, 62),
          fonts_get_system_font(UI_FONT_BODY), GColorWhite);
@@ -310,6 +311,8 @@ static void draw(Layer *layer, GContext *ctx) {
     text(ctx, "Save interrupted. Select to retry.",
          GRect(25, 70, width - 50, 90),
          fonts_get_system_font(UI_FONT_BODY), GColorWhite);
+  } else if (showing_about) {
+    about_draw(ctx, width);
   } else if (picker) {
     text(ctx, "HEXSWEEPER", GRect(UI_CONTENT_INSET, 12, width - 2 * UI_CONTENT_INSET, 38),
          fonts_get_system_font(UI_FONT_BODY), GColorWhite);
@@ -336,7 +339,26 @@ static void draw(Layer *layer, GContext *ctx) {
   if (s.gesture.drag && elapsed < 1000)
     APP_LOG(APP_LOG_LEVEL_DEBUG, "HS frame_ms=%lu", (unsigned long)elapsed);
 }
+static void set_about(bool active) {
+  cancel_tap();
+  cancel_frame();
+  picker_touched = false;
+  flat_cancel();
+  controller_cancel(&s);
+  showing_about = active;
+  if (active)
+    about_open();
+  else
+    about_close();
+}
 static void button(int b) {
+  if (showing_about) {
+    if (b == HS_SELECT || b == HS_BACK)
+      set_about(false);
+    trace();
+    redraw();
+    return;
+  }
   if (save_failed) {
     if (b == HS_SELECT)
       record();
@@ -373,6 +395,12 @@ static void button(int b) {
   }
   if (app_mode != 2) {
     int result = flat_button(b);
+    if (result == 3) {
+      set_about(true);
+      trace();
+      redraw();
+      return;
+    }
     cancel_frame();
     record();
     if (!save_failed && result == 2) {
@@ -388,6 +416,12 @@ static void button(int b) {
     redraw();
     if (!picker && flat_busy())
       schedule();
+    return;
+  }
+  if (s.mode == HS_PAUSE && s.menu == 5 && b == HS_SELECT) {
+    set_about(true);
+    trace();
+    redraw();
     return;
   }
   if (s.mode == HS_PAUSE && s.menu == 4 && b == HS_SELECT) {
@@ -456,6 +490,22 @@ static void touch(const TouchEvent *e, void *ctx) {
   } else if (e->type == TouchEvent_Liftoff) {
     cancel_tap();
   }
+  if (showing_about) {
+    if (e->type == TouchEvent_Touchdown) {
+      picker_touched = true;
+      picker_dragged = false;
+      picker_down = GPoint(e->x, e->y);
+    } else if (picker_touched) {
+      if (abs(e->x - picker_down.x) > 8 || abs(e->y - picker_down.y) > 8)
+        picker_dragged = true;
+      if (e->type == TouchEvent_Liftoff) {
+        picker_touched = false;
+        if (!picker_dragged && gesture_clock <= 350)
+          button(HS_BACK);
+      }
+    }
+    return;
+  }
   if (!picker && app_mode == 2 && (s.mode == HS_PAUSE || s.mode == HS_CONFIRM || s.mode == HS_HELP)) {
     if (e->type == TouchEvent_Touchdown) {
       picker_touched = true;
@@ -511,6 +561,12 @@ static void touch(const TouchEvent *e, void *ctx) {
   if (app_mode != 2) {
     int result = flat_touch(e, gesture_clock);
     if (e->type == TouchEvent_Liftoff) {
+      if (result == 3) {
+        set_about(true);
+        trace();
+        redraw();
+        return;
+      }
       cancel_frame();
       record();
       if (!save_failed && result == 2) {
@@ -599,6 +655,7 @@ static void load(Window *w) {
     schedule();
 }
 static void unload(Window *w) {
+  about_close();
   layer_destroy(canvas);
   canvas = NULL;
 }

@@ -1,9 +1,11 @@
 # Hexsweeper for Pebble
 
-Version **0.7.0** offers **Classic, Infinite, and 3D** in one app.
+Version **0.7.1** offers **Classic, Infinite, and 3D** in one app.
 Each mode keeps its own board. Every launch opens the mode picker with the last mode highlighted.
 Selecting a mode resumes its saved board. Choose Game modes from the pause menu to switch,
 or Save and exit from the picker to return to the watch.
+
+Version 0.7.1 adds About to each mode’s pause menu, with Luke Steuber’s portrait and the app version. Tap, Select or Back returns to the same menu selection without changing the board. The portrait is loaded only while About is open.
 
 Version 0.7.0 enlarges the boards and text. Classic keeps all 37 cells on screen
 with 26-pixel spacing on Time 2 and 32-pixel spacing on Round 2. Classic and
@@ -46,7 +48,7 @@ revealed cells and pending flood expansion across interrupted saves.
 The combined app keeps the existing 3D UUID and save format. The old standalone
 Classic app has separate storage that this app cannot import. Archived releases
 and historical validation below describe the earlier standalone 3D app; the
-current candidate is staged in `release/0.7.0/`. The earlier 0.5.0 store release remains a draft.
+current candidate is staged in `release/0.7.1/`. The earlier 0.5.0 store release remains a draft.
 
 A small sphere of 42 cells, with seven hidden mines. Drag it to turn it in your
 hand, or travel around it using the watch buttons. Built by Luke Steuber.
@@ -182,7 +184,7 @@ has no warnings. Exact PBW hashes and native captures accompany the staged bundl
 The native emulator proves software behavior and screenshots at both display
 sizes. It does **not** prove physical touch accuracy, finger occlusion, outdoor
 readability, tactile controls, battery life or the target of 15 fps while dragging.
-Those checks remain open on a physical Time 2 and a physical Round 2. Version 0.7.0 is a locally staged candidate; the previously published build remains available.
+Those checks remain open on a physical Time 2 and a physical Round 2. Version 0.7.1 is a locally staged candidate; the previously published build remains available.
 
 Version 0.5.0 passes both the full 3D gameplay suite and combined-mode suite on both targets, with reports matching the exact PBW. Checks cover mode switching, independent flags/boards, distant Infinite exploration and exact last-mode resume. Core tests cover chording in every mode, signed coordinate seams, history exhaustion and interrupted snapshot recovery.
 

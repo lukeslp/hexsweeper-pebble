@@ -136,6 +136,22 @@ def run(platform):
     def grab(name):
         time.sleep(.15)
         pixels = cmd._grab_processed_image(argparse.Namespace(no_correction=True, scale=1, no_open=True, v=0), show_progress=False)
+        if name.endswith('-about'):
+            # Screenshot transport can sample during a native draw. Require a
+            # naturally settled portrait in two consecutive complete captures.
+            previous = None
+            deadline = time.monotonic() + 3
+            while True:
+                picture = tuple(tuple(row) for row in pixels)
+                colored = sum(max(row[i:i+3])-min(row[i:i+3]) > 60
+                              for row in picture[47:143]
+                              for i in range((width//2-48)*4,(width//2+48)*4,4))
+                if colored > 300 and picture == previous:
+                    break
+                assert time.monotonic() < deadline, ('Portrait did not settle', name, colored)
+                previous = picture
+                time.sleep(.15)
+                pixels = cmd._grab_processed_image(argparse.Namespace(no_correction=True, scale=1, no_open=True, v=0), show_progress=False)
         file = out / f'{platform}-{name}.png'
         png.from_array(pixels, mode='RGBA;8').save(str(file))
         frames.append(str(file.relative_to(ROOT)))
@@ -161,6 +177,35 @@ def run(platform):
     def choose(mode):
         while current()['choice']!=mode:button('Down')
         button('Select');expect(app=mode,picker=0)
+    def check_about(label):
+        before=current()
+        app=before['app']
+        index=5 if app==2 else 4
+        button('Back')
+        for _ in range(index):button('Down')
+        expect(menu=index,about=0)
+        grab(label+'-about-menu')
+        button('Select');expect(about=1,menu=index)
+        grab(label+'-about')
+        button('Down');expect(about=1,menu=index)
+        button('Select');expect(about=0,menu=index)
+        button('Select');expect(about=1)
+        grab(label+'-reopened-about')
+        button('Back');expect(about=0,menu=index)
+        # Open the visible fourth row, then return using a separate tap.
+        touch([(width//2,48+3*38+19)]);expect(about=1)
+        touch([(width//2,100)]);expect(about=0,menu=index)
+        time.sleep(.3);expect(about=0,menu=index)
+        # A held contact must not pass through a button dismissal.
+        button('Select');expect(about=1)
+        pointer(width//2,100,True);time.sleep(.05)
+        button('Back');expect(about=0,menu=index)
+        pointer(width//2,100,False);time.sleep(.3)
+        expect(about=0,menu=index)
+        button('Back')
+        keys=('selected','flags','status','opened') if app==2 else ('selected','flags','status','open') if app==0 else ('q','r','flags','status','open')
+        expect(**{k:before[k] for k in keys})
+        expect(**({'mode':0} if app==2 else {'ui':0}))
     try:
         time.sleep(4);button('Back')
         AppInstaller(watch,str(PBW)).install()
@@ -173,6 +218,7 @@ def run(platform):
         button('Select',hold=.65);expect(flags=0)
         button('Select');assert current()['open']>=7
         classic=current();grab('classic')
+        check_about('classic')
         pitch=26 if platform=='emery' else 32
         rise=22 if platform=='emery' else 27
         coords=[(q,r) for r in range(-3,4) for q in range(-3,4) if abs(q+r)<=3]
@@ -182,10 +228,10 @@ def run(platform):
         touch([(width//2,height//2)])
         expect(selected=18)
         button('Back')
-        for _ in range(4):button('Down')
+        for _ in range(5):button('Down')
         grab('classic-menu-last')
-        # The last selected row scrolls into view; Game modes is now row three.
-        touch([(width//2,48+2*38+19)])
+        # The last selected row scrolls into view; Game modes is now row two.
+        touch([(width//2,48+1*38+19)])
         expect(picker=1)
         choose(0);expect(ui=0)
         button('Back');touch([(width//2,48+19)]);expect(ui=0)
@@ -200,6 +246,7 @@ def run(platform):
             button('Up');button('Select');button('Back')
         button('Select',hold=.65);expect(flags=1)
         before=current();grab('infinite-distant-flag')
+        check_about('infinite')
         cy=height//2
         pitch=26 if platform=='emery' else 32
         touch([(width//2+2*pitch,cy),(width//2-2*pitch,cy)])
@@ -209,6 +256,7 @@ def run(platform):
         modes();choose(2);expect(mode=3)
         button('Select');button('Select',hold=.65);expect(flags=1)
         grab('sphere-flag')
+        check_about('sphere')
         modes();choose(1)
         expect(q=before['q'],r=before['r'],flags=1,open=before['open'],ui=0)
         watch.send_packet(AppRunState(data=AppRunStateStop(uuid=APP)))
@@ -234,7 +282,7 @@ def run(platform):
         report={'platform':platform,'sdk':SDK_VERSION,'pbwSHA256':installed_sha,'passed':True,
                 'checks':['three-mode picker','classic first dig and flag','all 37 enlarged Classic tap targets','enlarged scrolling menu taps','infinite safe opening',
                           'button exploration beyond viewport','distant flag','drag pan and return',
-                          'independent sphere flag','per-mode saves','launch picker highlights last mode and preserves exact save'],
+                          'About in all modes: two consecutive settled portrait captures per opening/reopening, Select/Back/tap return, held-contact isolation, unchanged game state','independent sphere flag','per-mode saves','launch picker highlights last mode and preserves exact save'],
                 'frames':frames,'logs':logs}
         (out/f'{platform}-report.json').write_text(json.dumps(report,indent=2))
         print('PASS combined',platform)
