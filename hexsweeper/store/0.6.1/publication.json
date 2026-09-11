@@ -1,0 +1,21 @@
+{
+  "name": "Minesweeper Hex",
+  "version": "0.6.1",
+  "appId": "94e4d9abfb8e44488f419862",
+  "visibility": "Published",
+  "releaseState": "Published",
+  "publicURL": "https://apps.repebble.com/94e4d9abfb8e44488f419862",
+  "downloadURL": "https://appstore-api.repebble.com/api/assets/pbw/94e4d9abfb8e44488f419862/0.6.1/75a97608-c677-4ae7-81e1-59f5f3389387.pbw",
+  "pbwSHA256": "7fd8adcb4aa5ff27a5aa294987557895f9942acd3c5817ab25e093d2631fad64",
+  "publicDownloadVerified": true,
+  "httpStatus": 200,
+  "bytes": 69524,
+  "targets": [
+    "emery",
+    "gabbro"
+  ],
+  "verifiedAt": "2026-09-11T05:14:09.128242+00:00",
+  "physicalValidation": "Not performed; prior physical crash attribution remains open",
+  "verification": "Dashboard Published, public title/version/targets inspected, unauthenticated download matches the frozen tested PBW.",
+  "listingChanges": "Preserved owner title Minesweeper Hex and existing media; updated the launch-mode sentence to match 0.6.1."
+}
