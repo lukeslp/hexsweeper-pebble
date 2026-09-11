@@ -2,6 +2,7 @@
 #include "game.h"
 #include "geometry.h"
 #include <pebble.h>
+#include "ui_style.h"
 static Game g;
 static Window *win;
 static Layer *layer;
@@ -42,17 +43,16 @@ static bool restore(void) {
 static void text(GContext *c, const char *s, int y, int hh, bool big) {
   graphics_context_set_text_color(c, GColorWhite);
   graphics_draw_text(c, s,
-                     fonts_get_system_font(big ? FONT_KEY_GOTHIC_24_BOLD
-                                               : FONT_KEY_GOTHIC_18_BOLD),
-                     GRect(22, y, w - 44, hh), GTextOverflowModeWordWrap,
+                     fonts_get_system_font(big ? UI_FONT_TITLE : UI_FONT_BODY),
+                     GRect(UI_CONTENT_INSET, y, w - 2 * UI_CONTENT_INSET, hh), GTextOverflowModeWordWrap,
                      GTextAlignmentCenter, NULL);
 }
 static GPoint center(int i) {
-  return GPoint(w / 2 + 22 * XY[i][0] + 11 * XY[i][1],
-                h / 2 - 6 + 19 * XY[i][1]);
+  return GPoint(w / 2 + UI_HEX_X * XY[i][0] + UI_HEX_HALF_X * XY[i][1],
+                h / 2 - 2 + UI_HEX_Y * XY[i][1]);
 }
 static void hex(GContext *c, GPoint p, int shrink, bool fill) {
-  int a = 11 - shrink, b = 12 - shrink;
+  int a = UI_HEX_HALF_X - shrink, b = UI_HEX_HALF_Y - shrink;
   GPoint v[] = {GPoint(p.x, p.y - b),         GPoint(p.x + a, p.y - b / 2),
                 GPoint(p.x + a, p.y + b / 2), GPoint(p.x, p.y + b),
                 GPoint(p.x - a, p.y + b / 2), GPoint(p.x - a, p.y - b / 2)};
@@ -62,10 +62,21 @@ static void hex(GContext *c, GPoint p, int shrink, bool fill) {
   else
     gpath_draw_outline(c, &path);
 }
+static void compact(GContext *c, const char *s, int y) {
+  if (y > h - 55) y = h - PBL_IF_ROUND_ELSE(36, 28);
+  graphics_context_set_text_color(c, GColorWhite);
+  int inset = PBL_IF_ROUND_ELSE(48, 8);
+  graphics_draw_text(c, s, fonts_get_system_font(UI_FONT_SMALL),
+      GRect(inset, y, w - inset * 2, 25), GTextOverflowModeTrailingEllipsis,
+      GTextAlignmentCenter, NULL);
+}
 static void row(GContext *c, const char *s, int y, bool on) {
-  graphics_context_set_fill_color(c, on ? GColorDarkGray : GColorBlack);
-  graphics_fill_rect(c, GRect(26, y, w - 52, 32), 4, GCornersAll);
-  text(c, s, y + 2, 28, false);
+  GRect r = GRect(UI_CONTENT_INSET, y, w - 2 * UI_CONTENT_INSET, UI_ROW_HEIGHT);
+  graphics_context_set_fill_color(c, on ? GColorWhite : GColorBlack);
+  graphics_fill_rect(c, r, 3, GCornersAll);
+  graphics_context_set_text_color(c, on ? GColorBlack : GColorWhite);
+  graphics_draw_text(c, s, fonts_get_system_font(UI_FONT_BODY), r,
+      GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 }
 static void draw(Layer *l, GContext *c) {
   graphics_context_set_fill_color(c, GColorBlack);
@@ -74,29 +85,28 @@ static void draw(Layer *l, GContext *c) {
   if (screen == 2) {
     text(c, "HEXSWEEPER", 18, 36, true);
     text(c,
-         "Tap aims; Select digs.\nHold Select to flag.\nUp/Down move focus.\n"
-         "Select a clue: open nearby\nif flags match. Back: menu.",
-         62, 116, false);
-    text(c, "Select to play", h - 36, 26, false);
+         "Tap aims. Select digs.\nHold Select: flag.\nUp/Down: move focus.\nSelect clues: chord.\nClear 31 safe cells.",
+         58, 142, false);
+    compact(c, "Select to play", h - 27);
     return;
   }
   if (screen == 1) {
-    text(c, "HEXSWEEPER", 20, 32, true);
+    text(c, "HEXSWEEPER", 12, 36, true);
     const char *items[] = {"Resume", "How to play", "New board",
                            "Save and exit"};
     for (int i = 0; i < 4; i++)
-      row(c, items[i], 58 + i * 34, menu == i);
+      row(c, items[i], 54 + i * UI_ROW_HEIGHT, menu == i);
     return;
   }
   if (screen == 3) {
     text(c, "Replace board?", 35, 40, true);
     row(c, "Keep playing", 112, menu == 0);
-    row(c, "New board", 148, menu == 1);
+    row(c, "New board", 150, menu == 1);
     return;
   }
   snprintf(b, sizeof b, "%d/31 safe   %d flags", game_open_count(&g),
            game_flag_count(&g));
-  text(c, b, 18, 24, false);
+  compact(c, b, PBL_IF_ROUND_ELSE(6, 2));
   for (int pass = 0; pass < 2; pass++)
     for (int i = 0; i < 37; i++) {
       if (pass && i != selected)
@@ -107,17 +117,21 @@ static void draw(Layer *l, GContext *c) {
       bool open = state & HS_OPEN,
            mine = (state & HS_MINE) && g.status == HS_LOST;
       if (pass) {
-        graphics_context_set_stroke_width(c, 2);
+        graphics_context_set_stroke_width(c, 4);
         graphics_context_set_stroke_color(c, GColorWhite);
         hex(c, p, 0, false);
+        graphics_context_set_stroke_width(c, 2);
+        graphics_context_set_stroke_color(c, GColorBlack);
+        hex(c, p, 0, false);
         graphics_context_set_stroke_color(c, GColorCyan);
+        graphics_context_set_stroke_width(c, 1);
         hex(c, p, 2, false);
         graphics_context_set_stroke_width(c, 1);
         continue;
       }
       graphics_context_set_fill_color(c, mine      ? GColorMelon
                                          : flagged ? GColorChromeYellow
-                                         : open    ? GColorBlack
+                                         : open    ? GColorWhite
                                                    : GColorDarkGray);
       hex(c, p, 1, true);
       graphics_context_set_stroke_color(c, GColorLightGray);
@@ -146,10 +160,10 @@ static void draw(Layer *l, GContext *c) {
         int n = game_clue(&g, i);
         if (n) {
           char s[2] = {'0' + n, 0};
-          graphics_context_set_text_color(c, GColorWhite);
+          graphics_context_set_text_color(c, GColorBlack);
           graphics_draw_text(
-              c, s, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
-              GRect(p.x - 9, p.y - 12, 18, 23),
+              c, s, fonts_get_system_font(UI_FONT_BODY),
+              GRect(p.x - 13, p.y - 16, 26, 30),
               GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
         }
       } else {
@@ -159,14 +173,12 @@ static void draw(Layer *l, GContext *c) {
             graphics_draw_pixel(c, GPoint(p.x + x, p.y + y));
       }
     }
-  const char *status = g.status == HS_WON            ? "BOARD CLEARED"
-                       : g.status == HS_LOST         ? "MINE HIT"
+  const char *status = g.status == HS_WON ? "BOARD CLEARED"
+                       : g.status == HS_LOST ? "MINE HIT"
+                       : save_failed ? "Save failed"
                        : g.cells[selected] & HS_FLAG ? "FLAGGED"
-                       : g.cells[selected] & HS_OPEN ? "OPEN"
-                                                     : "COVERED";
-  text(c, status, h - (h > 240 ? 61 : 42), 23, false);
-  text(c, save_failed ? "Save failed" : "Select / hold",
-       h - (h > 240 ? 40 : 23), 20, false);
+                       : "Dig · hold to flag";
+  compact(c, status, h - 28);
 }
 static void refresh(void) {
   APP_LOG(APP_LOG_LEVEL_INFO,
@@ -283,18 +295,18 @@ static void touch(const TouchEvent *e, void *x) {
           best = i;
         }
       }
-      if (distance <= 121) {
+      if (distance <= UI_HEX_HALF_Y * UI_HEX_HALF_Y) {
         selected = best;
         save();
         refresh();
       }
     } else if (screen == 2)
       action(1);
-    else if (screen == 1 && sy >= 58 && sy < 194) {
-      menu = (sy - 58) / 34;
+    else if (screen == 1 && sy >= 54 && sy < 54 + 4 * UI_ROW_HEIGHT) {
+      menu = (sy - 54) / UI_ROW_HEIGHT;
       action(1);
-    } else if (screen == 3 && sy >= 112 && sy < 180) {
-      menu = sy >= 148;
+    } else if (screen == 3 && sy >= 112 && sy < 150 + UI_ROW_HEIGHT) {
+      menu = sy >= 150;
       action(1);
     }
   }

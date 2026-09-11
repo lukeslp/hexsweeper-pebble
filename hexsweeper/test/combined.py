@@ -173,6 +173,22 @@ def run(platform):
         button('Select',hold=.65);expect(flags=0)
         button('Select');assert current()['open']>=7
         classic=current();grab('classic')
+        pitch=26 if platform=='emery' else 32
+        rise=22 if platform=='emery' else 27
+        coords=[(q,r) for r in range(-3,4) for q in range(-3,4) if abs(q+r)<=3]
+        for i,(q,r) in enumerate(coords):
+            touch([(width//2+pitch*q+pitch//2*r,height//2-2+rise*r)])
+            expect(selected=i,open=classic['open'],flags=classic['flags'])
+        touch([(width//2,height//2)])
+        expect(selected=18)
+        button('Back')
+        for _ in range(4):button('Down')
+        grab('classic-menu-last')
+        # The last selected row scrolls into view; Game modes is now row three.
+        touch([(width//2,48+2*38+19)])
+        expect(picker=1)
+        choose(0);expect(ui=0)
+        button('Back');touch([(width//2,48+19)]);expect(ui=0)
         modes();choose(1);expect(ui=3);grab('infinite-help')
         button('Select');button('Select')
         time.sleep(2)
@@ -184,10 +200,11 @@ def run(platform):
             button('Up');button('Select');button('Back')
         button('Select',hold=.65);expect(flags=1)
         before=current();grab('infinite-distant-flag')
-        cy=height//2-10
-        touch([(width//2+44,cy),(width//2-44,cy)])
+        cy=height//2
+        pitch=26 if platform=='emery' else 32
+        touch([(width//2+2*pitch,cy),(width//2-2*pitch,cy)])
         expect(q=before['q']+4,r=before['r'],flags=1)
-        touch([(width//2-44,cy),(width//2+44,cy)])
+        touch([(width//2-2*pitch,cy),(width//2+2*pitch,cy)])
         expect(q=before['q'],r=before['r'],cell=2)
         modes();choose(2);expect(mode=3)
         button('Select');button('Select',hold=.65);expect(flags=1)
@@ -206,10 +223,16 @@ def run(platform):
         modes();choose(0);expect(open=classic['open'],flags=classic['flags'],ui=0)
         grab('classic-resumed')
         modes();choose(2);expect(flags=1)
+        button('Back')
+        for _ in range(4):button('Down')
+        grab('sphere-menu-last')
+        touch([(width//2,48+3*38+19)])
+        expect(picker=1)
+        choose(2);expect(flags=1)
         assert hashlib.sha256(PBW.read_bytes()).hexdigest()==installed_sha
         assert not any('fault' in x.lower() or 'crash' in x.lower() for x in logs)
         report={'platform':platform,'sdk':SDK_VERSION,'pbwSHA256':installed_sha,'passed':True,
-                'checks':['three-mode picker','classic first dig and flag','infinite safe opening',
+                'checks':['three-mode picker','classic first dig and flag','all 37 enlarged Classic tap targets','enlarged scrolling menu taps','infinite safe opening',
                           'button exploration beyond viewport','distant flag','drag pan and return',
                           'independent sphere flag','per-mode saves','launch picker highlights last mode and preserves exact save'],
                 'frames':frames,'logs':logs}

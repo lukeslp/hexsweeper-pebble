@@ -137,7 +137,7 @@ def run(platform):
         frames.append(str(file.relative_to(ROOT)))
         return pixels
     width, height = (200, 228) if platform == 'emery' else (260, 260)
-    x, y = width // 2, 105 if platform == 'emery' else 126
+    x, y = width // 2, height // 2
     def pointer(px, py, down):
         events = [{'type': 'abs', 'data': {'axis': axis, 'value': round(value * 32767 / (size - 1))}}
                   for axis, value, size in [('x', px, width), ('y', py, height)]]
@@ -290,9 +290,13 @@ def run(platform):
         expect(direct=1, mode=2)
         grab('pause-direct')
         button('Back')
+        touch([(x, 12)])
+        expect(opened=0, status=0)
+        touch([(x, height-12)])
+        expect(opened=0, status=0)
         touch([(x, y)], interval=.45)
         expect(status=0, opened=0)
-        touch([(x, y - (77 if platform == 'emery' else 89))])
+        touch([(x, y - (84 if platform == 'emery' else 102))])
         expect(selected=11, status=0, opened=0)
         touch([(x, y), (x + 35, y), (x, y)])
         expect(status=0, opened=0)  # Maximum excursion latches even on return.
@@ -321,7 +325,7 @@ def run(platform):
         report = {'platform': platform, 'sdk': SDK_VERSION, 'pbwSHA256': installed_sha,
                   'capturedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'passed': True,
                   'checks': ['all help pages', 'aim-first touch', 'long-click suppression', 'first dig', '42 cells reached with buttons', 'button-only win', 'loss',
-                             'save/relaunch', 'direct touch preference', 'long touch ignored', 'rim tap centers without digging', 'drag latch', 'drag rotation', 'direct touch dig', 'new-game cancellation', 'static idle'],
+                             'save/relaunch', 'direct touch preference', 'opaque readout taps do not dig', 'long touch ignored', 'rim tap centers without digging', 'drag latch', 'drag rotation', 'direct touch dig', 'new-game cancellation', 'static idle'],
                   'frames': frames, 'logs': logs, 'limits': 'Native emulator only; physical touch accuracy, readability and frame rate are untested.'}
         (out / f'{platform}-report.json').write_text(json.dumps(report, indent=2) + '\n')
         print('PASS', platform, flush=True)

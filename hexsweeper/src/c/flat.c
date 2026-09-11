@@ -5,6 +5,7 @@
 #include "controller.h"
 #include "infinite.h"
 #include "world_save.h"
+#include "ui_style.h"
 #include <limits.h>
 static ClassicGame finite;
 static Infinite world;
@@ -12,7 +13,6 @@ static int kind, w, h, ui, menu, selected = 18, direction, help;
 static bool flag_tool, failed, touched, dragged;
 static GPoint down_point;
 static InfCoord down_focus;
-static uint32_t down_time;
 static const InfIO io = {persist_read_data, persist_write_data};
 typedef struct {
   ClassicGame game;
@@ -69,36 +69,52 @@ void flat_init(int mode, int width, int height) {
 }
 void flat_cancel(void) { touched = false; }
 static GPoint center(int q, int r) {
-  return GPoint(w / 2 + 22 * q + 11 * r, h / 2 - 10 + 19 * r);
+  return GPoint(w / 2 + UI_HEX_X * q + UI_HEX_HALF_X * r,
+                h / 2 - 2 + UI_HEX_Y * r);
 }
 static void text(GContext *c, const char *s, int y, int hh, bool big) {
   graphics_context_set_text_color(c, GColorWhite);
   graphics_draw_text(c, s,
-                     fonts_get_system_font(big ? FONT_KEY_GOTHIC_24_BOLD
-                                               : FONT_KEY_GOTHIC_18_BOLD),
-                     GRect(24, y, w - 48, hh), GTextOverflowModeWordWrap,
+                     fonts_get_system_font(big ? UI_FONT_TITLE : UI_FONT_BODY),
+                     GRect(UI_CONTENT_INSET, y, w - UI_CONTENT_INSET * 2, hh), GTextOverflowModeWordWrap,
                      GTextAlignmentCenter, NULL);
 }
 static void row(GContext *c, const char *s, int y, bool on) {
-  graphics_context_set_fill_color(c, on ? GColorDarkGray : GColorBlack);
-  graphics_fill_rect(c, GRect(26, y, w - 52, 27), 3, GCornersAll);
-  text(c, s, y, 27, false);
+  graphics_context_set_fill_color(c, on ? GColorWhite : GColorBlack);
+  GRect r = GRect(UI_CONTENT_INSET, y, w - UI_CONTENT_INSET * 2, UI_ROW_HEIGHT);
+  graphics_fill_rect(c, r, 3, GCornersAll);
+  graphics_context_set_text_color(c, on ? GColorBlack : GColorWhite);
+  graphics_draw_text(c, s, fonts_get_system_font(UI_FONT_BODY), r,
+                    GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 }
+static void compact(GContext *c, const char *s, int y) {
+  if (y > h - 55) y = h - PBL_IF_ROUND_ELSE(36, 28);
+  graphics_context_set_text_color(c, GColorWhite);
+  int inset = PBL_IF_ROUND_ELSE(48, 8);
+  graphics_draw_text(c, s, fonts_get_system_font(UI_FONT_SMALL),
+      GRect(inset, y, w - inset * 2, 24), GTextOverflowModeTrailingEllipsis,
+      GTextAlignmentCenter, NULL);
+}
+static int menu_first(void) { return menu > 3 ? menu - 3 : 0; }
 static void tile(GContext *c, GPoint p, int state, int clue, bool mine,
                  bool focus) {
-  GPoint pts[] = {{p.x - 11, p.y - 6}, {p.x, p.y - 12}, {p.x + 11, p.y - 6},
-                  {p.x + 11, p.y + 6}, {p.x, p.y + 12}, {p.x - 11, p.y + 6}};
+  const int a = UI_HEX_HALF_X, b = UI_HEX_HALF_Y;
+  GPoint pts[] = {{p.x - a, p.y - b / 2}, {p.x, p.y - b}, {p.x + a, p.y - b / 2},
+                  {p.x + a, p.y + b / 2}, {p.x, p.y + b}, {p.x - a, p.y + b / 2}};
   GPath path = {.num_points = 6, .points = pts};
   bool open = state & INF_OPEN, flag = state & INF_FLAG;
   graphics_context_set_fill_color(c, mine   ? GColorMelon
                                      : flag ? GColorChromeYellow
-                                     : open ? GColorBlack
+                                     : open ? GColorWhite
                                             : GColorDarkGray);
   gpath_draw_filled(c, &path);
   graphics_context_set_stroke_color(c, focus ? GColorWhite : GColorLightGray);
-  graphics_context_set_stroke_width(c, focus ? 3 : 1);
+  graphics_context_set_stroke_width(c, focus ? 5 : 1);
   gpath_draw_outline(c, &path);
   if (focus) {
+    graphics_context_set_stroke_color(c, GColorBlack);
+    graphics_context_set_stroke_width(c, 3);
+    gpath_draw_outline(c, &path);
     graphics_context_set_stroke_color(c, GColorCyan);
     graphics_context_set_stroke_width(c, 1);
     gpath_draw_outline(c, &path);
@@ -118,9 +134,9 @@ static void tile(GContext *c, GPoint p, int state, int clue, bool mine,
     graphics_fill_circle(c, p, 4);
   } else if (open && clue) {
     char n[2] = {(char)('0' + clue), 0};
-    graphics_context_set_text_color(c, GColorWhite);
-    graphics_draw_text(c, n, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD),
-                       GRect(p.x - 8, p.y - 10, 16, 20),
+    graphics_context_set_text_color(c, GColorBlack);
+    graphics_draw_text(c, n, fonts_get_system_font(UI_FONT_BODY),
+                       GRect(p.x - 13, p.y - 16, 26, 30),
                        GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter,
                        NULL);
   } else if (!open) {
@@ -131,11 +147,12 @@ static void tile(GContext *c, GPoint p, int state, int clue, bool mine,
   graphics_context_set_stroke_width(c, 1);
 }
 static bool visible(GPoint p) {
-  if (p.x < 12 || p.x > w - 12 || p.y < 53 || p.y > h - 55)
+  if (p.x < UI_HEX_HALF_X + 2 || p.x > w - UI_HEX_HALF_X - 2 ||
+      p.y < 48 + UI_HEX_HALF_Y || p.y > h - 33 - UI_HEX_HALF_Y)
     return false;
 #ifdef PBL_ROUND
   int x = p.x - w / 2, y = p.y - h / 2;
-  return x * x + y * y < (w / 2 - 13) * (w / 2 - 13);
+  return x * x + y * y < (w / 2 - UI_HEX_HALF_Y - 2) * (w / 2 - UI_HEX_HALF_Y - 2);
 #else
   return true;
 #endif
@@ -155,40 +172,37 @@ void flat_draw(GContext *c) {
     return;
   }
   if (ui == 2) {
-    text(c, kind ? "INFINITE" : "CLASSIC", 20, 32, true);
+    text(c, kind ? "INFINITE" : "CLASSIC", 8, 36, true);
     const char *items[] = {"Resume", "Controls", "New board", "Game modes",
                            "Save and exit"};
-    for (int i = 0; i < 5; i++)
-      row(c, items[i], 58 + i * 27, menu == i);
+    for (int i = menu_first(); i < 5 && i < menu_first() + 4; i++)
+      row(c, items[i], 48 + (i - menu_first()) * UI_ROW_HEIGHT, menu == i);
+    snprintf(b, sizeof b, "%d/5", menu + 1);
+    compact(c, b, h - 26);
     return;
   }
   if (ui == 4) {
     text(c, "Replace board?", 25, 40, true);
     text(c, "Only this mode resets.", 82, 44, false);
-    row(c, "Keep playing", 135, menu == 0);
+    row(c, "Keep playing", 132, menu == 0);
     row(c, "New board", 170, menu == 1);
     return;
   }
   if (ui == 3) {
     text(c, kind ? "INFINITE" : "CLASSIC", 20, 32, true);
     const char *body =
-        kind ? (help ? "No preset edge.\nTiles stay saved.\nIf storage fills, "
-                       "play\nin saved areas or\nstart a new field."
-                     : "Tap aims; drag pans.\nSelect digs; hold flags.\nUp: "
-                       "Explore. Down: tool.\nSelect clues to chord.\nBack: "
-                       "menu.")
-             : "Up/Down move focus.\nSelect digs; hold flags.\nTap a tile to "
-               "aim.\nSelect clues to chord.\nReveal 31 safe tiles.";
-    text(c, body, 62, 120, false);
-    text(c, kind ? "Up/Down: help\nSelect: play" : "Select: play", h - 43, 40,
-         false);
+        kind ? (help ? "Tiles stay saved.\nStorage full?\nKeep playing in\nsaved areas, or\nstart a new field."
+                     : "Drag pans. Tap aims.\nSelect digs; hold flags.\nUp: move. Down: tool.\nSelect clues: chord.\nBack: menu.")
+             : "Tap aims. Select digs.\nHold Select: flag.\nUp/Down: move focus.\nSelect clues: chord.\nClear 31 safe cells.";
+    text(c, body, 58, 142, false);
+    compact(c, kind ? "Up/Down: help" : "Select: play", h - 27);
     return;
   }
   if (kind) {
-    snprintf(b, sizeof b, "INFINITE: %lu safe", (unsigned long)world.opened);
-    text(c, b, 10, 24, false);
+    snprintf(b, sizeof b, "%lu safe  %lu flags", (unsigned long)world.opened, (unsigned long)world.flagged);
+    compact(c, b, 2);
     snprintf(b, sizeof b, "%ld, %ld", (long)world.focus.q, (long)world.focus.r);
-    text(c, b, 31, 24, false);
+    compact(c, b, 24);
     InfCoord highlight = world.focus;
     if (ui == 1)
       inf_neighbor(world.focus, direction, &highlight);
@@ -216,19 +230,11 @@ void flat_draw(GContext *c) {
     else
       snprintf(b, sizeof b, "%s  %lu flags", flag_tool ? "FLAG" : "DIG",
                (unsigned long)world.flagged);
-    text(c, b, h - 46, 24, false);
-    const char *hint = world.full ? "Saved areas still playable"
-                       : ui == 1  ? "Select: move; Back: dig"
-                                  : "Up: explore; Back: menu";
-    graphics_context_set_text_color(c, GColorWhite);
-    graphics_draw_text(c, hint, fonts_get_system_font(FONT_KEY_GOTHIC_14),
-                       GRect(30, h - 23, w - 60, 20),
-                       GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter,
-                       NULL);
+    compact(c, b, h - 29);
   } else {
     snprintf(b, sizeof b, "%d/31 safe  %d flags", classic_open_count(&finite),
              classic_flag_count(&finite));
-    text(c, b, 18, 25, false);
+    compact(c, b, PBL_IF_ROUND_ELSE(6, 2));
     for (int pass = 0; pass < 2; pass++)
       for (int i = 0; i < 37; i++) {
         if (pass && i != selected)
@@ -239,11 +245,11 @@ void flat_draw(GContext *c) {
              classic_clue(&finite, i),
              finite.status == FS_LOST && (s & FS_MINE), pass && i == selected);
       }
-    text(c,
+    compact(c,
          finite.status == FS_WON    ? "CLEARED"
          : finite.status == FS_LOST ? "MINE - Back: menu"
-                                    : "Select: dig  Hold: flag",
-         h - 40, 27, false);
+                                    : "Dig · hold to flag",
+         h - 28);
   }
 }
 int flat_button(int b) {
@@ -340,7 +346,7 @@ int flat_button(int b) {
   }
   return 0;
 }
-int flat_touch(const TouchEvent *e, uint32_t now) {
+int flat_touch(const TouchEvent *e, uint32_t tap_age) {
   if (e->non_navigational) {
     touched = false;
     return 0;
@@ -349,7 +355,6 @@ int flat_touch(const TouchEvent *e, uint32_t now) {
     touched = true;
     dragged = false;
     down_point = GPoint(e->x, e->y);
-    down_time = now;
     down_focus = world.focus;
     return 0;
   }
@@ -359,7 +364,7 @@ int flat_touch(const TouchEvent *e, uint32_t now) {
   if (abs(dx) > 8 || abs(dy) > 8)
     dragged = true;
   if (kind && ui < 2 && dragged && !failed) {
-    int r = -dy / 19, q = (-dx - 11 * r) / 22;
+    int r = -dy / UI_HEX_Y, q = (-dx - UI_HEX_HALF_X * r) / UI_HEX_X;
     int64_t x = (int64_t)down_focus.q + q, y = (int64_t)down_focus.r + r;
     if (x >= INT32_MIN && x <= INT32_MAX && y >= INT32_MIN && y <= INT32_MAX)
       world.focus = (InfCoord){x, y};
@@ -367,23 +372,25 @@ int flat_touch(const TouchEvent *e, uint32_t now) {
   if (e->type != TouchEvent_Liftoff)
     return 0;
   touched = false;
-  if (dragged || now - down_time > 350)
+  if (dragged && ui == 2 && abs(dy) >= UI_ROW_HEIGHT)
+    return flat_button(dy < 0 ? HS_DOWN : HS_UP);
+  if (dragged || tap_age > 350)
     return 0;
   if (failed)
     return flat_button(HS_SELECT);
   if (ui == 3)
     return flat_button(HS_SELECT);
-  if (ui == 2 && e->y >= 58 && e->y < 193) {
-    menu = (e->y - 58) / 27;
+  if (ui == 2 && e->y >= 48 && e->y < 48 + 4 * UI_ROW_HEIGHT) {
+    menu = menu_first() + (e->y - 48) / UI_ROW_HEIGHT;
     return flat_button(HS_SELECT);
   }
-  if (ui == 4 && e->y >= 135 && e->y < 197) {
+  if (ui == 4 && e->y >= 132 && e->y < 170 + UI_ROW_HEIGHT) {
     menu = e->y >= 170;
     return flat_button(HS_SELECT);
   }
   if (ui >= 2)
     return 0;
-  int best = 225;
+  int best = UI_HEX_HALF_Y * UI_HEX_HALF_Y;
   if (kind) {
     InfCoord target = world.focus;
     for (int r = -5; r <= 5; r++)

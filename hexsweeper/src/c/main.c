@@ -2,6 +2,7 @@
 #include "compat.h"
 #include "controller.h"
 #include "flat.h"
+#include "ui_style.h"
 #include <math.h>
 #include <pebble.h>
 static int round_coord(float x) { return (int)(x < 0 ? x - .5f : x + .5f); }
@@ -172,10 +173,13 @@ static void board(GContext *ctx) {
         graphics_context_set_stroke_color(ctx, GColorWhite);
         graphics_context_set_stroke_width(ctx, 5);
         gpath_draw_outline(ctx, &path);
+        graphics_context_set_stroke_color(ctx, GColorBlack);
+        graphics_context_set_stroke_width(ctx, 3);
+        gpath_draw_outline(ctx, &path);
       }
       graphics_context_set_stroke_color(ctx, pass == 1 ? GColorCyan
                                                        : GColorLightGray);
-      graphics_context_set_stroke_width(ctx, pass == 1 ? 2 : 1);
+      graphics_context_set_stroke_width(ctx, 1);
       gpath_draw_outline(ctx, &path);
       if (pass == 0 && !open && !mine && !flagged && poly.center.z >= .6f) {
         // Inset polygon gives covered cells a raised shape independent of hue.
@@ -209,7 +213,7 @@ static void board(GContext *ctx) {
         if (count) {
           char n[2] = {(char)('0' + count), 0};
           text(ctx, n, GRect(x - 13, y - 16, 26, 30),
-               fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorBlack);
+               fonts_get_system_font(UI_FONT_BODY), GColorBlack);
         }
       }
     }
@@ -217,126 +221,111 @@ static void board(GContext *ctx) {
   char top[48];
   snprintf(top, sizeof top, "%d/%d safe  %d flags", game_open_count(&s.game),
            HS_CELLS - HS_MINES, game_flag_count(&s.game));
-  int top_inset = PBL_IF_ROUND_ELSE(62, 4);
-  text(ctx, top,
-       GRect(top_inset, PBL_IF_ROUND_ELSE(13, 0), width - 2 * top_inset, 20),
-       fonts_get_system_font(FONT_KEY_GOTHIC_14), GColorWhite);
+  // Opaque readouts keep enlarged facets from running behind critical text.
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, GRect(0, 0, width, 28), 0, GCornerNone);
+  graphics_fill_rect(ctx, GRect(0, height - PBL_IF_ROUND_ELSE(45, 33), width, PBL_IF_ROUND_ELSE(45, 33)), 0, GCornerNone);
+  int top_inset = PBL_IF_ROUND_ELSE(48, 8);
+  text(ctx, top, GRect(top_inset, PBL_IF_ROUND_ELSE(6, 0), width - 2 * top_inset, 25),
+       fonts_get_system_font(UI_FONT_SMALL), GColorWhite);
   char bottom[50];
   int c = highlight;
   const char *tool = s.flag ? "FLAG" : "DIG";
   if (s.game.status == HS_WON)
-    snprintf(bottom, sizeof bottom, "CLEARED · Back: menu");
+    snprintf(bottom, sizeof bottom, "CLEARED");
   else if (s.game.status == HS_LOST)
-    snprintf(bottom, sizeof bottom, "MINE · Back: menu");
+    snprintf(bottom, sizeof bottom, "MINE HIT");
   else if (s.mode == HS_EXPLORE)
-    snprintf(bottom, sizeof bottom, "EXPLORE  %u/%u", s.neighbor + 1,
-             s.neighbor_count);
+    snprintf(bottom, sizeof bottom, "MOVE %u/%u", s.neighbor + 1, s.neighbor_count);
   else if (s.game.cells[c] & HS_FLAG)
-    snprintf(bottom, sizeof bottom, "%s · Flagged", tool);
+    snprintf(bottom, sizeof bottom, "%s · flagged", tool);
   else if (s.game.cells[c] & HS_OPEN)
-    snprintf(bottom, sizeof bottom, "%s · %u nearby", tool,
-             game_clue(&s.game, c));
+    snprintf(bottom, sizeof bottom, "%s · %u nearby", tool, game_clue(&s.game, c));
   else
-    snprintf(bottom, sizeof bottom, "%s · Covered", tool);
-  int inset = PBL_IF_ROUND_ELSE(55, 3);
-  text(ctx, bottom, GRect(inset, height - 40, width - 2 * inset, 23),
-       fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GColorWhite);
-  const char *hint = s.mode == HS_EXPLORE ? "Select: move  Back: play"
-                     : s.direct           ? "Tap acts · Up: explore"
-                                          : "Tap aims · Select: act";
-  if (!touch_ready && s.mode == HS_PLAY)
-    hint = "Up: explore · Select: act";
-  if (save_failed)
-    hint = "Save failed · Keep app open";
-  text(ctx, hint,
-       GRect(PBL_IF_ROUND_ELSE(64, 3), height - 21,
-             width - PBL_IF_ROUND_ELSE(128, 6), 18),
-       fonts_get_system_font(FONT_KEY_GOTHIC_14), GColorLightGray);
+    snprintf(bottom, sizeof bottom, "%s · covered", tool);
+  int inset = PBL_IF_ROUND_ELSE(47, 8);
+  text(ctx, bottom, GRect(inset, height - PBL_IF_ROUND_ELSE(48, 36), width - 2 * inset, 32),
+       fonts_get_system_font(UI_FONT_BODY), GColorWhite);
 }
 static void menu(GContext *ctx) {
-  const int inset = PBL_IF_ROUND_ELSE(43, 14), w = width - 2 * inset;
+  const int inset = UI_CONTENT_INSET, w = width - 2 * inset;
   const char *title = s.mode == HS_CONFIRM ? "NEW SPHERE?"
                       : s.mode == HS_HELP  ? "HOW TO PLAY"
                                            : "HEXSWEEPER 3D";
-  text(ctx, title, GRect(inset, PBL_IF_ROUND_ELSE(25, 15), w, 27),
-       fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorWhite);
+  text(ctx, title, GRect(inset, 8, w, 36),
+       fonts_get_system_font(UI_FONT_TITLE), GColorWhite);
   if (s.mode == HS_HELP) {
     const char *pages[] = {
-        "42 cells. Seven mines.\nFirst dig is safe.\nSelect an open clue: "
-        "reveal\n"
-        "neighbors if flags match.",
-        "Drag to rotate. Tap to aim.\nSelect digs. Hold it to flag.\nDown "
-        "switches Dig / Flag.",
-        "Up opens Explore.\nUp / Down choose a neighbor.\nSelect moves. Back "
-        "returns to play.",
-        "Back opens the menu.\nChoose direct taps there.\nRim taps only "
-        "aim.\nGames save on this watch."};
+        "42 cells. 7 mines.\nFirst dig is safe.\nSelect open clues:\nmatching flags open\ntheir neighbors.",
+        "Drag to turn.\nTap to aim.\nSelect digs.\nHold Select: flag.\nDown: Dig / Flag.",
+        "Up: explore.\nUp/Down: choose\na neighbor.\nSelect: move there.\nBack: play.",
+        "Back: menu.\nDirect taps are\noptional there.\nRim taps only aim.\nBoards stay saved."};
     if (!touch_ready) {
       pages[1] = "Select digs. Hold it to flag.\nDown switches Dig / Flag.\nUp "
                  "opens Explore.";
-      pages[3] = "Touch needs firmware 4.33.2 or later.\nUse buttons to "
-                 "play.\nGames save on this watch.";
+      pages[3] = "Touch needs\nfirmware 4.33.2.\nButtons still play.\nBoards stay saved.";
     }
-    text(ctx, pages[s.help], GRect(inset, 64, w, height - 106),
-         fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GColorWhite);
+    text(ctx, pages[s.help], GRect(inset, 52, w, height - 88),
+         fonts_get_system_font(UI_FONT_BODY), GColorWhite);
     char hint[36];
-    snprintf(hint, sizeof hint, "%u/4  Up/Down · Select: play", s.help + 1);
-    text(ctx, hint, GRect(inset, height - 40, w, 30),
-         fonts_get_system_font(FONT_KEY_GOTHIC_14), GColorLightGray);
+    snprintf(hint, sizeof hint, "%u/4  Select: play", s.help + 1);
+    text(ctx, hint, GRect(inset, height - PBL_IF_ROUND_ELSE(45, 29), w, 26),
+         fonts_get_system_font(UI_FONT_SMALL), GColorWhite);
     return;
   }
   const char *items[5] = {"Resume",
-                          s.direct ? "Touch: direct" : "Touch: aim first",
+                          s.direct ? "Direct taps: on" : "Direct taps: off",
                           "Controls", "New game", "Game modes"};
   if (!touch_ready)
     items[1] = "Touch: update watch";
   const char *confirm[2] = {"Keep playing", "Replace game"};
   int count = s.mode == HS_CONFIRM ? 2 : 5;
   if (s.mode == HS_CONFIRM)
-    text(ctx, "Your current board will be replaced.", GRect(inset, 65, w, 48),
-         fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GColorWhite);
-  int start = s.mode == HS_CONFIRM ? 125 : 60, row = 27;
-  for (int i = 0; i < count; i++) {
-    GRect rect = GRect(inset, start + i * row, w, row);
+    text(ctx, "Replace this board?", GRect(inset, 68, w, 62),
+         fonts_get_system_font(UI_FONT_BODY), GColorWhite);
+  int first = s.mode == HS_CONFIRM || s.menu < 4 ? 0 : s.menu - 3;
+  int start = s.mode == HS_CONFIRM ? 132 : 48;
+  for (int i = first; i < count && i < first + 4; i++) {
+    GRect rect = GRect(inset, start + (i - first) * UI_ROW_HEIGHT, w, UI_ROW_HEIGHT);
     bool selected = i == s.menu;
     if (selected) {
       graphics_context_set_fill_color(ctx, GColorWhite);
       graphics_fill_rect(ctx, rect, 3, GCornersAll);
     }
     text(ctx, s.mode == HS_CONFIRM ? confirm[i] : items[i], rect,
-         fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
+         fonts_get_system_font(UI_FONT_BODY),
          selected ? GColorBlack : GColorWhite);
   }
   if (save_failed)
     text(ctx, "Save failed. Back: play", GRect(inset, height - 27, w, 20),
-         fonts_get_system_font(FONT_KEY_GOTHIC_14), GColorWhite);
+         fonts_get_system_font(UI_FONT_SMALL), GColorWhite);
 }
 static void draw(Layer *layer, GContext *ctx) {
   uint32_t start = now_ms();
   last_frame = start;
   graphics_context_set_fill_color(ctx, GColorBlack);
   graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornersAll);
-  graphics_context_set_antialiased(ctx, true);
+  graphics_context_set_antialiased(ctx, false);
   if (save_failed) {
     text(ctx, "Save interrupted. Select to retry.",
          GRect(25, 70, width - 50, 90),
-         fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorWhite);
+         fonts_get_system_font(UI_FONT_BODY), GColorWhite);
   } else if (picker) {
-    text(ctx, "HEXSWEEPER", GRect(25, 22, width - 50, 32),
-         fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GColorWhite);
+    text(ctx, "HEXSWEEPER", GRect(UI_CONTENT_INSET, 12, width - 2 * UI_CONTENT_INSET, 38),
+         fonts_get_system_font(UI_FONT_BODY), GColorWhite);
     const char *names[] = {"Classic", "Infinite", "3D", "Save and exit"};
     for (int i = 0; i < 4; i++) {
-      GRect r = GRect(30, 64 + i * 30, width - 60, 29);
+      GRect r = GRect(UI_CONTENT_INSET, 54 + i * UI_ROW_HEIGHT, width - 2 * UI_CONTENT_INSET, UI_ROW_HEIGHT);
       if (i == mode_choice) {
-        graphics_context_set_fill_color(ctx, GColorDarkGray);
+        graphics_context_set_fill_color(ctx, GColorWhite);
         graphics_fill_rect(ctx, r, 3, GCornersAll);
       }
-      text(ctx, names[i], r, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
-           GColorWhite);
+      text(ctx, names[i], r, fonts_get_system_font(UI_FONT_BODY),
+           i == mode_choice ? GColorBlack : GColorWhite);
     }
-    text(ctx, "Each mode keeps its board",
-         GRect(25, height - 32, width - 50, 23),
-         fonts_get_system_font(FONT_KEY_GOTHIC_14), GColorWhite);
+    text(ctx, "Boards stay saved",
+         GRect(30, height - PBL_IF_ROUND_ELSE(45, 26), width - 60, 24),
+         fonts_get_system_font(UI_FONT_SMALL), GColorWhite);
   } else if (app_mode != 2)
     flat_draw(ctx);
   else if (s.mode == HS_PLAY || s.mode == HS_EXPLORE)
@@ -445,20 +434,74 @@ static void clicks(void *ctx) {
 static void touch(const TouchEvent *e, void *ctx) {
   if (!focused)
     return;
-  if (picker) {
+  if (e->non_navigational) {
+    cancel_tap();
+    picker_touched = false;
+    flat_cancel();
+    controller_cancel(&s);
+    return;
+  }
+  // A phone clock correction can move RTC backwards during a tap. All modes
+  // use one event-loop deadline, so a valid tap cannot underflow its age.
+  if (e->type == TouchEvent_Touchdown) {
+    cancel_tap();
+    gesture_clock = 0;
+    tap_timer = app_timer_register(350, expire_tap, NULL);
+    if (!tap_timer) {
+      picker_touched = false;
+      flat_cancel();
+      controller_cancel(&s);
+      return; // No timer: reject this contact, keep buttons available.
+    }
+  } else if (e->type == TouchEvent_Liftoff) {
+    cancel_tap();
+  }
+  if (!picker && app_mode == 2 && (s.mode == HS_PAUSE || s.mode == HS_CONFIRM || s.mode == HS_HELP)) {
     if (e->type == TouchEvent_Touchdown) {
       picker_touched = true;
       picker_dragged = false;
       picker_down = GPoint(e->x, e->y);
-      picker_time = now_ms();
+      picker_time = 0;
     } else if (picker_touched) {
       if (abs(e->x - picker_down.x) > 8 || abs(e->y - picker_down.y) > 8)
         picker_dragged = true;
       if (e->type == TouchEvent_Liftoff) {
         picker_touched = false;
-        if (!picker_dragged && now_ms() - picker_time <= 350 && e->y >= 64 &&
-            e->y < 184) {
-          mode_choice = (e->y - 64) / 30;
+        int dy = e->y - picker_down.y;
+        if (picker_dragged) {
+          if (s.mode == HS_PAUSE && abs(dy) >= UI_ROW_HEIGHT)
+            button(dy < 0 ? HS_DOWN : HS_UP);
+          return;
+        }
+        if (gesture_clock - picker_time > 350 || e->x < UI_CONTENT_INSET || e->x >= width - UI_CONTENT_INSET)
+          return;
+        if (s.mode == HS_HELP) { button(HS_SELECT); return; }
+        int start = s.mode == HS_CONFIRM ? 132 : 48;
+        int count = s.mode == HS_CONFIRM ? 2 : 4;
+        if (e->y >= start && e->y < start + count * UI_ROW_HEIGHT) {
+          int first = s.mode == HS_CONFIRM || s.menu < 4 ? 0 : s.menu - 3;
+          s.menu = first + (e->y - start) / UI_ROW_HEIGHT;
+          button(HS_SELECT);
+        }
+      }
+    }
+    return;
+  }
+  if (picker) {
+    if (e->type == TouchEvent_Touchdown) {
+      picker_touched = true;
+      picker_dragged = false;
+      picker_down = GPoint(e->x, e->y);
+      picker_time = 0;
+    } else if (picker_touched) {
+      if (abs(e->x - picker_down.x) > 8 || abs(e->y - picker_down.y) > 8)
+        picker_dragged = true;
+      if (e->type == TouchEvent_Liftoff) {
+        picker_touched = false;
+        if (!picker_dragged && gesture_clock - picker_time <= 350 &&
+            e->x >= UI_CONTENT_INSET && e->x < width - UI_CONTENT_INSET && e->y >= 54 &&
+            e->y < 54 + 4 * UI_ROW_HEIGHT) {
+          mode_choice = (e->y - 54) / UI_ROW_HEIGHT;
           button(HS_SELECT);
         }
       }
@@ -466,7 +509,7 @@ static void touch(const TouchEvent *e, void *ctx) {
     return;
   }
   if (app_mode != 2) {
-    int result = flat_touch(e, now_ms());
+    int result = flat_touch(e, gesture_clock);
     if (e->type == TouchEvent_Liftoff) {
       cancel_frame();
       record();
@@ -489,15 +532,11 @@ static void touch(const TouchEvent *e, void *ctx) {
   int type = e->type == TouchEvent_Touchdown ? HS_TOUCH_DOWN
              : e->type == TouchEvent_Liftoff ? HS_TOUCH_UP
                                              : HS_TOUCH_MOVE;
-  // AppTimer is independent of phone/RTC corrections. The controller only needs
-  // to distinguish an eligible tap from one whose 350 ms deadline has expired.
-  if (type == HS_TOUCH_DOWN) {
-    cancel_tap();
-    gesture_clock = 0;
+  if (type == HS_TOUCH_DOWN && (e->y < 28 || e->y >= height - PBL_IF_ROUND_ELSE(45, 33))) {
+    controller_cancel(&s);
+    return;
   }
   controller_touch(&s, type, e->x, e->y, gesture_clock, e->non_navigational);
-  if (type == HS_TOUCH_DOWN && s.gesture.active)
-    tap_timer = app_timer_register(350, expire_tap, NULL);
   if (type == HS_TOUCH_UP || e->non_navigational) {
     cancel_tap();
     cancel_frame();
@@ -527,8 +566,8 @@ static void load(Window *w) {
   width = bounds.size.w;
   height = bounds.size.h;
   Viewport view = {width / 2.f,
-                   PBL_IF_ROUND_ELSE(height / 2.f - 4, height / 2.f - 9),
-                   PBL_IF_ROUND_ELSE(99, 86)};
+                   height / 2.f,
+                   PBL_IF_ROUND_ELSE(114, 94)};
   controller_init(&s, (uint32_t)time(NULL), view);
   SavedGame save;
   bool restored = false;

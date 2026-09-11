@@ -4,7 +4,8 @@
 void flat_init(int kind, int width, int height);
 void flat_draw(GContext *);
 int flat_button(int button);
-int flat_touch(const TouchEvent *, uint32_t now);
+// The shell supplies elapsed tap age from its AppTimer, never the wall clock.
+int flat_touch(const TouchEvent *, uint32_t tap_age);
 bool flat_save(void);
 bool flat_busy(void);
 void flat_tick(void);
