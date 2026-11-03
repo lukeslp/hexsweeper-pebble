@@ -12,20 +12,22 @@ void about_close(void) {
     portrait = NULL;
   }
 }
-static void line(GContext *ctx, const char *value, int width, int y,
-                 int height, const char *font) {
+static void line(GContext *ctx, const char *value, Box b, int font) {
   graphics_context_set_text_color(ctx, GColorWhite);
-  graphics_draw_text(ctx, value, fonts_get_system_font(font),
-      GRect(24, y, width - 48, height), GTextOverflowModeTrailingEllipsis,
-      GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, value, ui_font(font), ui_rect(b),
+                     GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 }
 void about_draw(GContext *ctx, int width) {
-  line(ctx, "About", width, 10, 37, UI_FONT_TITLE);
+  const Layout *l = &ui_layout;
+  line(ctx, "About", l->about_title, l->about_title_font);
   if (portrait) {
+    // Each display ships a portrait sized for it; center whatever was loaded.
+    GSize size = gbitmap_get_bounds(portrait).size;
     graphics_context_set_compositing_mode(ctx, GCompOpSet);
-    graphics_draw_bitmap_in_rect(ctx, portrait, GRect((width - 96) / 2, 47, 96, 96));
+    graphics_draw_bitmap_in_rect(ctx, portrait,
+                                 GRect((width - size.w) / 2, l->portrait_y, size.w, size.h));
   }
-  line(ctx, "Luke Steuber", width, 144, 32, UI_FONT_BODY);
-  line(ctx, "Version " UI_APP_VERSION, width, 176, 25, UI_FONT_SMALL);
-  line(ctx, "Tap / Select / Back", width, 203, 25, UI_FONT_SMALL);
+  line(ctx, "Luke Steuber", l->about_name, 24);
+  line(ctx, "Version " UI_APP_VERSION, l->about_version, 18);
+  line(ctx, UI_ABOUT_HINT, l->about_hint, 18);
 }

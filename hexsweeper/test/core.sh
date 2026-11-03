@@ -23,3 +23,7 @@ for suite in core chord; do
   cc -std=c11 -Wall -Wextra -Werror -g -fsanitize=address,undefined -Isrc/c test/classic_$suite.c src/c/classic.c -o build/test/classic-$suite
   build/test/classic-$suite
 done
+
+cc -std=c11 -Wall -Wextra -Werror -g -fsanitize=address,undefined -Isrc/c \
+  test/layout.c src/c/layout.c -o build/test/layout
+build/test/layout

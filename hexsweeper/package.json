@@ -1,6 +1,6 @@
 {
   "name": "hexsweeper",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "author": "Luke Steuber",
   "private": true,
   "keywords": [
@@ -14,7 +14,11 @@
     "sdkVersion": "3",
     "enableMultiJS": false,
     "targetPlatforms": [
+      "basalt",
+      "chalk",
+      "diorite",
       "emery",
+      "flint",
       "gabbro"
     ],
     "watchapp": {
@@ -32,7 +36,29 @@
         {
           "type": "bitmap",
           "name": "ABOUT_PORTRAIT",
-          "file": "images/about-portrait.png"
+          "file": "images/about-portrait.png",
+          "targetPlatforms": [
+            "emery",
+            "gabbro"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "ABOUT_PORTRAIT",
+          "file": "images/about-portrait-72.png",
+          "targetPlatforms": [
+            "basalt",
+            "chalk"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "ABOUT_PORTRAIT",
+          "file": "images/about-portrait-72-bw.png",
+          "targetPlatforms": [
+            "diorite",
+            "flint"
+          ]
         }
       ]
     }
