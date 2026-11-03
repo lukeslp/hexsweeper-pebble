@@ -1,0 +1,125 @@
+{
+  "version": "0.8.0",
+  "author": "Luke Steuber",
+  "pbwSHA256": "cd767371b01e427da73aa201928ff597e4005cd8b618f4dbe59f734cb657e354",
+  "sdk": "4.33.1",
+  "pebbleTool": "5.0.39",
+  "hostTests": "test/core.sh passed, including the new test/layout.c check of all four display sizes.",
+  "platforms": {
+    "basalt": {
+      "firmware": "4.3.0",
+      "touchscreen": false,
+      "ramFootprintBytes": 34027,
+      "heapFreeBytes": 31509,
+      "resourceBytes": 5782,
+      "gameplaySuite": {
+        "passed": true,
+        "checks": 11,
+        "inputRetries": "not available: run before resends were added"
+      },
+      "combinedSuite": {
+        "passed": true,
+        "checks": 11,
+        "inputRetries": "not available: run before resends were added"
+      }
+    },
+    "chalk": {
+      "firmware": "4.3.0",
+      "touchscreen": false,
+      "ramFootprintBytes": 34091,
+      "heapFreeBytes": 31445,
+      "resourceBytes": 5782,
+      "gameplaySuite": {
+        "passed": true,
+        "checks": 11,
+        "inputRetries": "not available: run before resends were added"
+      },
+      "combinedSuite": {
+        "passed": true,
+        "checks": 11,
+        "inputRetries": [
+          "Select after 15 states",
+          "Down after 39 states",
+          "Down after 44 states",
+          "Down after 51 states"
+        ]
+      }
+    },
+    "diorite": {
+      "firmware": "4.3.0",
+      "touchscreen": false,
+      "ramFootprintBytes": 34335,
+      "heapFreeBytes": 31201,
+      "resourceBytes": 4715,
+      "gameplaySuite": {
+        "passed": true,
+        "checks": 11,
+        "inputRetries": "not available: run before resends were added"
+      },
+      "combinedSuite": {
+        "passed": true,
+        "checks": 11,
+        "inputRetries": "not available: run before resends were added"
+      }
+    },
+    "emery": {
+      "firmware": "4.33.2",
+      "touchscreen": true,
+      "ramFootprintBytes": 37609,
+      "heapFreeBytes": 93463,
+      "resourceBytes": 6314,
+      "gameplaySuite": {
+        "passed": true,
+        "checks": 17,
+        "inputRetries": "not available: run before resends were added"
+      },
+      "combinedSuite": {
+        "passed": true,
+        "checks": 12,
+        "inputRetries": "not available: run before resends were added"
+      }
+    },
+    "flint": {
+      "firmware": "4.33.2",
+      "touchscreen": false,
+      "ramFootprintBytes": 34335,
+      "heapFreeBytes": 31201,
+      "resourceBytes": 4715,
+      "gameplaySuite": {
+        "passed": true,
+        "checks": 11,
+        "inputRetries": "not available: run before resends were added"
+      },
+      "combinedSuite": {
+        "passed": true,
+        "checks": 11,
+        "inputRetries": "not available: run before resends were added"
+      }
+    },
+    "gabbro": {
+      "firmware": "4.33.2",
+      "touchscreen": true,
+      "ramFootprintBytes": 37665,
+      "heapFreeBytes": 93407,
+      "resourceBytes": 6314,
+      "gameplaySuite": {
+        "passed": true,
+        "checks": 17,
+        "inputRetries": "not available: run before resends were added"
+      },
+      "combinedSuite": {
+        "passed": true,
+        "checks": 12,
+        "inputRetries": "not available: run before resends were added"
+      }
+    }
+  },
+  "upgradeCompare": {
+    "pairs": 48,
+    "identical": 46,
+    "differences": "About version number only (76 pixels on each watch)."
+  },
+  "sourceZip": "Built standalone with pebble build after extraction; every pebble-app.bin matches the frozen PBW except header bytes for the build timestamp, GNU build ID and CRC; resource packs and appinfo.json are identical.",
+  "stackFix": "The unchanged 0.7.1 source built for basalt stops responding after a Classic dig (emulator). 0.8.0 draws the sphere, menu and picker in their own frames and keeps text buffers static: deepest app frames on basalt are draw 48, flat_draw 120, tile 152, board 328 bytes.",
+  "limits": "Native emulator only. No physical watch was used; physical readability, buttons, touch accuracy, battery and frame rate are untested."
+}

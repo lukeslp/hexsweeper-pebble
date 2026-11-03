@@ -1,0 +1,140 @@
+{
+  "title": "Minesweeper Hex",
+  "version": "0.8.0",
+  "author": "Luke Steuber",
+  "uuid": "f42b810c-aef1-4937-bf01-5e36d5f29407",
+  "pbwSHA256": "cd767371b01e427da73aa201928ff597e4005cd8b618f4dbe59f734cb657e354",
+  "targets": [
+    "basalt",
+    "chalk",
+    "diorite",
+    "emery",
+    "flint",
+    "gabbro"
+  ],
+  "releaseNotes": "Minesweeper Hex now runs on Pebble Time, Time Steel, Time Round, Pebble 2 and Pebble 2 Duo, with boards and menus laid out for each screen and black-and-white tiles that never rely on color. Time 2 and Round 2 play exactly as before.",
+  "releaseState": "Staged; not published. Awaiting owner approval.",
+  "screenshots": {
+    "basalt_sphere.png": {
+      "from": "release/0.8.0/evidence/basalt-first-dig.png",
+      "sha256": "c1eaf0faf19b53c109bd29d52d642968e4f8b62b16302e352dd9b4308a6d43ae"
+    },
+    "basalt_classic.png": {
+      "from": "release/0.8.0/evidence/basalt-classic.png",
+      "sha256": "b051eade6ad67cff28eddc836cd49ffd74ea7642e247f95d3fcbab3e545b4d43"
+    },
+    "basalt_infinite.png": {
+      "from": "release/0.8.0/evidence/basalt-infinite-distant-flag.png",
+      "sha256": "481303e86981044e2232e156992314c43ecb84cd1dd91a9938797530b2895037"
+    },
+    "basalt_won.png": {
+      "from": "release/0.8.0/evidence/basalt-won.png",
+      "sha256": "bad66798224c2f2e7cf330ace4f191ee65f6124f702424598bdaa3146c04f5c0"
+    },
+    "basalt_about.png": {
+      "from": "release/0.8.0/evidence/basalt-sphere-about.png",
+      "sha256": "578ba650ea6e9ea1e3c10e542d89282902d3a6dd57e7a235b1b9433f788cf599"
+    },
+    "chalk_sphere.png": {
+      "from": "release/0.8.0/evidence/chalk-first-dig.png",
+      "sha256": "4e7853d2efbe87fd827912dca77fbe999a85e20ae82ed0d99cd8be1c8573c2e4"
+    },
+    "chalk_classic.png": {
+      "from": "release/0.8.0/evidence/chalk-classic.png",
+      "sha256": "8118cfb841cadbc7856ff3d483db992d96e18ecdc7e556402433e252beda16f1"
+    },
+    "chalk_infinite.png": {
+      "from": "release/0.8.0/evidence/chalk-infinite-distant-flag.png",
+      "sha256": "365d8adf31d13098bef3243f6ac97983c8fe28c52c5abb9afd1029ea713a3c5c"
+    },
+    "chalk_won.png": {
+      "from": "release/0.8.0/evidence/chalk-won.png",
+      "sha256": "e51f98523b3f64dc0f30a4058c35b0913adb74c70242e65756f309fcbd588a48"
+    },
+    "chalk_about.png": {
+      "from": "release/0.8.0/evidence/chalk-sphere-about.png",
+      "sha256": "fe139f6bde9f842401dd1409c52e0ca8c9e99deb4e8480f144979e77cd364f5a"
+    },
+    "diorite_sphere.png": {
+      "from": "release/0.8.0/evidence/diorite-first-dig.png",
+      "sha256": "1372e589fccd98d7ac9e92d716ec803e3274604649e133bd5b5f962ff5011a19"
+    },
+    "diorite_classic.png": {
+      "from": "release/0.8.0/evidence/diorite-classic.png",
+      "sha256": "70800085962e6005a93f294d61c35515e117c416484575d80278ecb983636151"
+    },
+    "diorite_infinite.png": {
+      "from": "release/0.8.0/evidence/diorite-infinite-distant-flag.png",
+      "sha256": "803a1f49251869a9cc53680be0926f712a151401a5e6d8e386456d4cc29c33c3"
+    },
+    "diorite_won.png": {
+      "from": "release/0.8.0/evidence/diorite-won.png",
+      "sha256": "b3e402212a853b695b7e31b6c2b165cb9a3da805c90aea77b7fef2e250e75df8"
+    },
+    "diorite_about.png": {
+      "from": "release/0.8.0/evidence/diorite-sphere-about.png",
+      "sha256": "73645515b73c69838aebce811bd831a060d8517df30b45785cc25b3aef1b6d76"
+    },
+    "emery_sphere.png": {
+      "from": "release/0.8.0/evidence/emery-touch-dig.png",
+      "sha256": "c94a9a84e5b44b2e33d0f151bb60c3401ca84c2ee954727b12fdef605d714fa4"
+    },
+    "emery_classic.png": {
+      "from": "release/0.8.0/evidence/emery-classic.png",
+      "sha256": "c9ac45dbdfefe3e3b424325d7dc7bf4f07e2eb1b544980775cb01a9d545037cf"
+    },
+    "emery_infinite.png": {
+      "from": "release/0.8.0/evidence/emery-infinite-distant-flag.png",
+      "sha256": "3331029055bd176be024ac5e08c77aa91e7137127cafb2a95ee84b3769f9c89f"
+    },
+    "emery_won.png": {
+      "from": "release/0.8.0/evidence/emery-won.png",
+      "sha256": "925ba2fc7a087d2c308fe7aae660752f28b5e616cf288cfdb39795478f389fc8"
+    },
+    "emery_about.png": {
+      "from": "release/0.8.0/evidence/emery-sphere-about.png",
+      "sha256": "19a9722ad0686f33bfed145b1c427ad050f810b4060bb4bbcde28968ea2a9bf7"
+    },
+    "flint_sphere.png": {
+      "from": "release/0.8.0/evidence/flint-first-dig.png",
+      "sha256": "e3d9ba47facc5c69d9260f8f33b0caa3df7eddaf85003d4308061dda35779c2a"
+    },
+    "flint_classic.png": {
+      "from": "release/0.8.0/evidence/flint-classic.png",
+      "sha256": "98165285da3fb63efc075db528748901b4a39fc9998fceb34f9ed935034bb6ae"
+    },
+    "flint_infinite.png": {
+      "from": "release/0.8.0/evidence/flint-infinite-distant-flag.png",
+      "sha256": "20286b868493a611421e641cdadd8c6ab4dba715dd01da8326345eea178a2481"
+    },
+    "flint_won.png": {
+      "from": "release/0.8.0/evidence/flint-won.png",
+      "sha256": "99cc9fb02a0930ce62f8336f10ec70819b14ac144c95b5b8c3109304faadf7e5"
+    },
+    "flint_about.png": {
+      "from": "release/0.8.0/evidence/flint-sphere-about.png",
+      "sha256": "73645515b73c69838aebce811bd831a060d8517df30b45785cc25b3aef1b6d76"
+    },
+    "gabbro_sphere.png": {
+      "from": "release/0.8.0/evidence/gabbro-touch-dig.png",
+      "sha256": "1e7d37047248930cf4c91e64dba6afd5a6282571b7018404aa2986aac71dc9e1"
+    },
+    "gabbro_classic.png": {
+      "from": "release/0.8.0/evidence/gabbro-classic.png",
+      "sha256": "e01e0c15e44ac546cdba767d8a20776ba72517b5d3cb55d7f4300434677b6426"
+    },
+    "gabbro_infinite.png": {
+      "from": "release/0.8.0/evidence/gabbro-infinite-distant-flag.png",
+      "sha256": "6368c49119257cf8b9a08b0c77178684548b54bae63bd304f3655a15b419774b"
+    },
+    "gabbro_won.png": {
+      "from": "release/0.8.0/evidence/gabbro-won.png",
+      "sha256": "2fbd0855fbee6cbfc8d800fd19dc92c8370d7e7ed44555c31faefe439c457234"
+    },
+    "gabbro_about.png": {
+      "from": "release/0.8.0/evidence/gabbro-sphere-about.png",
+      "sha256": "619870046b993afa4416fdc1f152d641518a4599c1f3e087d130bb5092d7dd6d"
+    }
+  },
+  "physicalWatchValidated": false
+}

@@ -1,0 +1,452 @@
+{
+  "purpose": "Time 2 and Round 2 must look exactly as in the published 0.7.1.",
+  "publishedPBW": "hexsweeper-0.7.1.pbw",
+  "publishedSHA256": "55b4659576771e93531759d7d24c2beb2dde14f3b70f9acab6bb49d446345944",
+  "stagedSHA256": "cd767371b01e427da73aa201928ff597e4005cd8b618f4dbe59f734cb657e354",
+  "method": "ab-*: boards played in 0.7.1, then upgraded in place in the same emulator profile (same UUID, saves kept) and the same screens captured in 0.8.0. conf-*: confirmation screens from fresh profiles in each build. before-/after-: the scripted steps used for the published captures, rerun on 0.8.0.",
+  "expectedDifference": "About shows Version 0.8.0 instead of 0.7.1.",
+  "pairs": [
+    {
+      "platform": "emery",
+      "screen": "help1",
+      "published": "ab-emery-a-help1.png",
+      "staged": "ab-emery-b-help1.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "help2",
+      "published": "ab-emery-a-help2.png",
+      "staged": "ab-emery-b-help2.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "help3",
+      "published": "ab-emery-a-help3.png",
+      "staged": "ab-emery-b-help3.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "help4",
+      "published": "ab-emery-a-help4.png",
+      "staged": "ab-emery-b-help4.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "sflag",
+      "published": "ab-emery-a-sflag.png",
+      "staged": "ab-emery-b-sflag.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "spause",
+      "published": "ab-emery-a-spause.png",
+      "staged": "ab-emery-b-spause.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "spause-last",
+      "published": "ab-emery-a-spause-last.png",
+      "staged": "ab-emery-b-spause-last.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "sabout",
+      "published": "ab-emery-a-sabout.png",
+      "staged": "ab-emery-b-sabout.png",
+      "identical": false,
+      "differingPixels": 76,
+      "box": [
+        124,
+        183,
+        142,
+        194
+      ]
+    },
+    {
+      "platform": "emery",
+      "screen": "picker2",
+      "published": "ab-emery-a-picker2.png",
+      "staged": "ab-emery-b-picker2.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "chelp",
+      "published": "ab-emery-a-chelp.png",
+      "staged": "ab-emery-b-chelp.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "cpause",
+      "published": "ab-emery-a-cpause.png",
+      "staged": "ab-emery-b-cpause.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "cend",
+      "published": "ab-emery-a-cend.png",
+      "staged": "ab-emery-b-cend.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "ihelp",
+      "published": "ab-emery-a-ihelp.png",
+      "staged": "ab-emery-b-ihelp.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "ipause",
+      "published": "ab-emery-a-ipause.png",
+      "staged": "ab-emery-b-ipause.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "iview",
+      "published": "ab-emery-a-iview.png",
+      "staged": "ab-emery-b-iview.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "cconfirm",
+      "published": "conf-old-emery-cconfirm.png",
+      "staged": "conf-new-emery-cconfirm.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "iconfirm",
+      "published": "conf-old-emery-iconfirm.png",
+      "staged": "conf-new-emery-iconfirm.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "sconfirm",
+      "published": "conf-old-emery-sconfirm.png",
+      "staged": "conf-new-emery-sconfirm.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "picker",
+      "published": "before-hex-emery-picker.png",
+      "staged": "after-hex-emery-picker.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "classic",
+      "published": "before-hex-emery-classic.png",
+      "staged": "after-hex-emery-classic.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "dug",
+      "published": "before-hex-emery-dug.png",
+      "staged": "after-hex-emery-dug.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "flag",
+      "published": "before-hex-emery-flag.png",
+      "staged": "after-hex-emery-flag.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "pause",
+      "published": "before-hex-emery-pause.png",
+      "staged": "after-hex-emery-pause.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "emery",
+      "screen": "pause2",
+      "published": "before-hex-emery-pause2.png",
+      "staged": "after-hex-emery-pause2.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "help1",
+      "published": "ab-gabbro-a-help1.png",
+      "staged": "ab-gabbro-b-help1.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "help2",
+      "published": "ab-gabbro-a-help2.png",
+      "staged": "ab-gabbro-b-help2.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "help3",
+      "published": "ab-gabbro-a-help3.png",
+      "staged": "ab-gabbro-b-help3.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "help4",
+      "published": "ab-gabbro-a-help4.png",
+      "staged": "ab-gabbro-b-help4.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "sflag",
+      "published": "ab-gabbro-a-sflag.png",
+      "staged": "ab-gabbro-b-sflag.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "spause",
+      "published": "ab-gabbro-a-spause.png",
+      "staged": "ab-gabbro-b-spause.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "spause-last",
+      "published": "ab-gabbro-a-spause-last.png",
+      "staged": "ab-gabbro-b-spause-last.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "sabout",
+      "published": "ab-gabbro-a-sabout.png",
+      "staged": "ab-gabbro-b-sabout.png",
+      "identical": false,
+      "differingPixels": 76,
+      "box": [
+        154,
+        183,
+        172,
+        194
+      ]
+    },
+    {
+      "platform": "gabbro",
+      "screen": "picker2",
+      "published": "ab-gabbro-a-picker2.png",
+      "staged": "ab-gabbro-b-picker2.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "chelp",
+      "published": "ab-gabbro-a-chelp.png",
+      "staged": "ab-gabbro-b-chelp.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "cpause",
+      "published": "ab-gabbro-a-cpause.png",
+      "staged": "ab-gabbro-b-cpause.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "cend",
+      "published": "ab-gabbro-a-cend.png",
+      "staged": "ab-gabbro-b-cend.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "ihelp",
+      "published": "ab-gabbro-a-ihelp.png",
+      "staged": "ab-gabbro-b-ihelp.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "ipause",
+      "published": "ab-gabbro-a-ipause.png",
+      "staged": "ab-gabbro-b-ipause.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "iview",
+      "published": "ab-gabbro-a-iview.png",
+      "staged": "ab-gabbro-b-iview.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "cconfirm",
+      "published": "conf-old-gabbro-cconfirm.png",
+      "staged": "conf-new-gabbro-cconfirm.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "iconfirm",
+      "published": "conf-old-gabbro-iconfirm.png",
+      "staged": "conf-new-gabbro-iconfirm.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "sconfirm",
+      "published": "conf-old-gabbro-sconfirm.png",
+      "staged": "conf-new-gabbro-sconfirm.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "picker",
+      "published": "before-hex-gabbro-picker.png",
+      "staged": "after-hex-gabbro-picker.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "classic",
+      "published": "before-hex-gabbro-classic.png",
+      "staged": "after-hex-gabbro-classic.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "dug",
+      "published": "before-hex-gabbro-dug.png",
+      "staged": "after-hex-gabbro-dug.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "flag",
+      "published": "before-hex-gabbro-flag.png",
+      "staged": "after-hex-gabbro-flag.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "pause",
+      "published": "before-hex-gabbro-pause.png",
+      "staged": "after-hex-gabbro-pause.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    },
+    {
+      "platform": "gabbro",
+      "screen": "pause2",
+      "published": "before-hex-gabbro-pause2.png",
+      "staged": "after-hex-gabbro-pause2.png",
+      "identical": true,
+      "differingPixels": 0,
+      "box": null
+    }
+  ]
+}

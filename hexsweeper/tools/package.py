@@ -11,20 +11,25 @@ metadata = json.loads((ROOT / 'package.json').read_text())
 version = metadata['version']
 pbw = ROOT / 'build' / (ROOT.name + '.pbw')
 sha = hashlib.sha256(pbw.read_bytes()).hexdigest()
+TARGETS = ('basalt', 'chalk', 'diorite', 'emery', 'flint', 'gabbro')
+NAMES = {'basalt': 'Pebble Time · 144 × 168', 'chalk': 'Pebble Time Round · 180 × 180',
+         'diorite': 'Pebble 2 · 144 × 168', 'emery': 'Pebble Time 2 · 200 × 228',
+         'flint': 'Pebble 2 Duo · 144 × 168', 'gabbro': 'Pebble Round 2 · 260 × 260'}
+ROUND = {'chalk', 'gabbro'}
 evidence = ROOT / 'build/evidence'
 reports = []
 for suite in ('evidence', 'combined-evidence'):
-    for target in ('emery', 'gabbro'):
+    for target in TARGETS:
         report_path = ROOT / 'build' / suite / f'{target}-report.json'
         report = json.loads(report_path.read_text())
         assert report['passed'] and report['platform'] == target and report['pbwSHA256'] == sha
         reports.append((suite, report_path, report))
 with zipfile.ZipFile(pbw) as bundle:
     names = set(bundle.namelist())
-    assert all(f'{t}/pebble-app.bin' in names for t in ('emery', 'gabbro'))
+    assert all(f'{t}/pebble-app.bin' in names for t in TARGETS)
     assert not any(name.endswith('.js') for name in names)
     info = json.loads(bundle.read('appinfo.json'))
-    assert set(info['targetPlatforms']) == {'emery', 'gabbro'}
+    assert set(info['targetPlatforms']) == set(TARGETS)
     assert not info.get('capabilities')
     assert not info['watchapp']['watchface']
 
@@ -54,7 +59,15 @@ with zipfile.ZipFile(source, 'w', zipfile.ZIP_DEFLATED) as archive:
         archive.write(REPO / relative, Path('hexsweeper-source') / relative)
 (out / 'manifest.json').write_text(json.dumps({'name': 'Hexsweeper', 'version': version,
     'author': 'Luke Steuber', 'uuid': metadata['pebble']['uuid'], 'pbwSHA256': sha,
-    'targets': ['emery', 'gabbro'], 'evidence': 'Native emulator; physical-watch checks remain open.'}, indent=2) + '\n')
+    'targets': list(TARGETS), 'evidence': 'Native emulator; physical-watch checks remain open.'}, indent=2) + '\n')
+def figure(target):
+    frame = 'touch-dig' if target in ('emery', 'gabbro') else 'dig'
+    w, h = {'chalk': (270, 270), 'gabbro': (300, 300), 'emery': (250, 285)}.get(target, (216, 252))
+    css = ' class="round"' if target in ROUND else ''
+    return (f'<figure><img{css} width="{w}" height="{h}" src="evidence/{target}-{frame}.png" '
+            f'alt="{NAMES[target].split(" ·")[0]} emulator showing the sphere after a safe dig">'
+            f'<figcaption>{NAMES[target]}</figcaption></figure>')
+figures = '\n'.join(figure(t) for t in TARGETS)
 (out / 'preview.html').write_text('''<!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Hexsweeper — Pebble preview</title>
@@ -66,13 +79,11 @@ figure{margin:20px 0}img{image-rendering:pixelated;max-width:100%;height:auto}fi
 .round{border-radius:50%}details{margin-top:30px}small{color:#c5c9cc}
 </style><main><small>Luke Steuber · Native Pebble watchapp</small>
 <h1>Hexsweeper</h1>
-<p>Classic, Infinite, and 3D. Each mode keeps its own board and resumes when you
-return. Tap to aim, Select to dig, and hold Select to flag.</p>
-<div class="watches"><figure><img width="300" height="342" src="evidence/emery-touch-dig.png" alt="Time 2 emulator showing the sphere after a safe touchscreen dig">
-<figcaption>Pebble Time 2 · 200 × 228</figcaption></figure>
-<figure><img class="round" width="390" height="390" src="evidence/gabbro-touch-dig.png" alt="Round 2 emulator showing the same spherical board layout">
-<figcaption>Pebble Round 2 · 260 × 260</figcaption></figure></div>
-<p>These are native emulator captures. Physical touch accuracy, readability and performance remain untested.</p>
+<p>Classic, Infinite, and 3D on every current Pebble. Each mode keeps its own
+board and resumes when you return. Select digs and holding Select flags; Time 2
+and Round 2 also aim by touch.</p>
+<div class="watches">''' + figures + '''</div>
+<p>These are native emulator captures. Physical readability, buttons, touch accuracy and performance remain untested.</p>
 <details><summary>Controls and completed games</summary>
 <div class="watches"><figure><img width="260" src="evidence/gabbro-pause-direct.png" alt="Pause menu with direct touch selected"><figcaption>Optional direct touch</figcaption></figure>
 <figure><img width="200" src="evidence/emery-won.png" alt="Time 2 win screen showing all 35 safe cells cleared"><figcaption>Complete button-only win</figcaption></figure></div></details>

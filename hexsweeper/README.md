@@ -1,9 +1,57 @@
 # Hexsweeper for Pebble
 
-Version **0.7.1** offers **Classic, Infinite, and 3D** in one app.
+Version **0.8.0** offers **Classic, Infinite, and 3D** in one app on every
+current Pebble: Time 2, Round 2, Time and Time Steel, Time Round, Pebble 2 and
+Pebble 2 Duo.
 Each mode keeps its own board. Every launch opens the mode picker with the last mode highlighted.
 Selecting a mode resumes its saved board. Choose Game modes from the pause menu to switch,
 or Save and exit from the picker to return to the watch.
+
+Version 0.8.0 adds four watches, each with a layout drawn for its screen
+rather than a scaled copy. Time 2 and Round 2 keep their 0.7 layout pixel for
+pixel. All screen geometry now comes from one table, `src/c/layout.c`, which
+`test/layout.c` checks on the host.
+
+| Watch | Platform | Screen | Layout |
+| --- | --- | --- | --- |
+| Time 2 | `emery` | 200 × 228, color, touch | Unchanged from 0.7. |
+| Round 2 | `gabbro` | 260 × 260 round, color, touch | Unchanged from 0.7. |
+| Time, Time Steel | `basalt` | 144 × 168, color | Small rectangle. |
+| Pebble 2 | `diorite` | 144 × 168, black and white | Small rectangle, black-and-white tiles. |
+| Pebble 2 Duo | `flint` | 144 × 168, black and white | Small rectangle, black-and-white tiles. |
+| Time Round | `chalk` | 180 × 180 round, color | Small round. |
+
+On 144 × 168 screens, Classic keeps all 37 cells with 20-pixel spacing between a
+Gothic 18 readout at each edge. Infinite shows seven rows, with the position
+beside the Dig or Flag tool at the bottom. The sphere has a 66-pixel radius
+between opaque readouts. Menus show four 32-pixel rows of Gothic 24 under a
+Gothic 24 title and follow the selected row. Help uses Gothic 18 so each page
+fits without truncation.
+
+On the 180 × 180 Time Round, the hexagonal Classic board and the sphere both sit
+centered in the circle, uniformly scaled, with all 37 cells inside the bezel.
+Readouts use short forms that fit the display's chord at their height: the
+sphere shows `12/35 · 2 flags` above and the tool below, Classic shows safe
+cells above and flags below, and Infinite shows safe cells and position above.
+Menus show three 34-pixel rows and follow the selected row.
+
+The Pebble 2 and Pebble 2 Duo draw every tile state with its own shape, never
+color alone: covered cells are black with a white edge and dots, open cells are
+white with black clues, flags are a white pennant on black, mines after a loss
+are a spiked glyph on white, and the mine that was hit is inverted. Focus is a
+double outline. The About portrait on these watches is a line-art copy of the
+same portrait; the 144 and 180 pixel screens use a 72-pixel portrait.
+
+Only the Time 2 and Round 2 have touchscreens. On the other four watches the
+3D pause menu omits the touch row, help pages and About use button-only wording,
+and the touch handler is not compiled. The firmware check still precedes every
+touch call on Time 2 and Round 2.
+
+Rendering now keeps large frames off the shared drawing path. In the 0.7 code a
+Classic or Infinite dig rendered beneath the sphere's 400-byte frame and stopped
+responding on the smaller watches; the sphere, menu and picker now draw in their
+own frames, and text buffers are static. Rules, save formats and the UUID are
+unchanged.
 
 Version 0.7.1 adds About to each mode’s pause menu, with Luke Steuber’s portrait and the app version. Tap, Select or Back returns to the same menu selection without changing the board. The portrait is loaded only while About is open.
 
@@ -50,15 +98,14 @@ Classic app has separate storage that this app cannot import. Archived releases
 and historical validation below describe the earlier standalone 3D app; the
 current release is in `release/0.7.1/` and is public as
 [Minesweeper Hex](https://apps.repebble.com/94e4d9abfb8e44488f419862).
+Version 0.8.0 is staged in `release/0.8.0/` and is not published.
 The separate old Classic listing was not recreated; Classic remains available
 inside the combined app.
 
 A small sphere of 42 cells, with seven hidden mines. Drag it to turn it in your
 hand, or travel around it using the watch buttons. Built by Luke Steuber.
 
-This native, offline watchapp targets **Pebble Time 2** (`emery`, 200 × 228)
-and **Pebble Round 2** (`gabbro`, 260 × 260). It does not target the older
-Pebble 2 or Time Round. It uses no phone JavaScript, network, account, microphone,
+This native, offline watchapp targets all six current platforms listed above. It uses no phone JavaScript, network, account, microphone,
 or health permissions.
 
 Version **0.4.0** gives flagged cells a solid amber fill and a larger black flag. The fill stays visible as a cell rotates toward the rim. A cyan outline over a white border marks focus independently of flags. Saved boards and game rules are unchanged.
@@ -120,11 +167,12 @@ through the rePebble tools, select that SDK, and run from this directory:
 sh test/core.sh
 pebble build
 # Use the Python interpreter belonging to the installed pebble-tool environment:
-python test/emulator.py emery
-python test/emulator.py gabbro
-python test/combined.py emery
-python test/combined.py gabbro
+for p in basalt chalk diorite emery flint gabbro; do
+  python test/emulator.py $p
+  python test/combined.py $p
+done
 python3 tools/package.py
+python3 tools/store_media.py
 ```
 
 The generated `src/c/geometry.h` is checked in, so `pebble build` has no Node or
@@ -136,18 +184,26 @@ canonical topology changes. The optional launcher-mark generator uses Pillow.
 `test/core.sh` runs the production rules, projection and controller with address
 and undefined-behavior sanitizers. It checks 42,000 seeded boards, first-dig
 safety, flood fill, flags, wins/losses, every cell's button reachability, gesture
-arbitration, horizon clipping and damaged saves.
+arbitration, horizon clipping and damaged saves. Its layout check confirms, for
+every display, that Time 2 and Round 2 keep their 0.7 geometry, that all 37
+Classic cells and every drawn Infinite cell sit on the display and clear of the
+readouts, that the sphere stays a centered circle, and that menu rows, help and
+About fit; on the Time Round it also checks the widest measured readouts against
+the display's chord.
 
 `test/emulator.py` installs the actual PBW into a fresh isolated emulator profile,
-injects physical-button events and QMP absolute-pointer touch events, plays a
+injects physical-button events and, on Time 2 and Round 2, QMP absolute-pointer touch events, plays a
 button-only win, checks a loss, verifies persistence and both touch styles, and
 captures native screenshots and logs. It only stops the processes it owns.
 It uses SDK emulator internals and is pinned to the toolchain above.
 
-`tools/package.py` requires passing reports for both targets that match the exact
-PBW hash. It stages the PBW, portable source ZIP, screenshots, reports and checksums
+`tools/package.py` requires passing reports for all six targets that match the
+exact PBW hash. It stages the PBW, portable source ZIP, screenshots, reports and checksums
 under `release/<version>/`. The ZIP retains the repository-relative geometry input;
 unzip it and enter `hexsweeper-source/appstores/pebble/hexsweeper` to build.
+`tools/store_media.py` then copies five unmodified captures per watch from that
+release's evidence into `store/<version>/` as `<platform>_<shot>.png`, with
+checksums and an unpublished listing record. Nothing is uploaded.
 
 ## Implementation
 
@@ -166,6 +222,27 @@ not also turn a drag into a button action. It does not call the new bridge API
 to retain that default.
 
 ## Validation boundary
+
+Version 0.8.0 passes the sanitizer suite, the layout check, and both native
+suites on all six emulators against the exact staged PBW (firmware 4.3.0 on
+`basalt`, `chalk` and `diorite`; 4.33.2 on `emery`, `flint` and `gabbro`). On
+the four watches without a touchscreen the suites play a complete button-only
+win, a loss, relaunch persistence, mode switching, About in every mode and
+focus on all 37 Classic cells, using buttons alone. On Time 2 and Round 2, an
+in-place upgrade from the published 0.7.1 keeps every saved board, and the
+help pages, boards after digs, flags and a loss, pause menus, confirmations
+and picker are pixel-identical before and after; About differs only in its
+version number. RAM footprint is 34,027 bytes on Time, 34,091 on Time Round,
+34,335 on Pebble 2 and Pebble 2 Duo, 37,609 on Time 2 and 37,665 on Round 2;
+the 64 KB watches keep at least 31,201 bytes of heap free. Physical-watch
+validation has not been performed on any of the six watches.
+
+Under heavy host load the emulators can drop an injected button press. The
+suites now wait up to 10 seconds for each response, capture the screen if none
+arrives, resend that press once and record it as `inputRetries`; a silent app
+still fails. Only the Time Round combined run needed resends (four, each
+answered at once). The suites also wait for an Infinite flood fill to finish
+before comparing totals.
 
 Version 0.4.0 retains the 0.2 rules and saved-board format. Its graphics changes are checked with the same native interaction suite and captures on both display shapes. Physical discrimination of tile states remains a watch test.
 

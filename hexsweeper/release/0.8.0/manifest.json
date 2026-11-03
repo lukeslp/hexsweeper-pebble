@@ -1,0 +1,16 @@
+{
+  "name": "Hexsweeper",
+  "version": "0.8.0",
+  "author": "Luke Steuber",
+  "uuid": "f42b810c-aef1-4937-bf01-5e36d5f29407",
+  "pbwSHA256": "cd767371b01e427da73aa201928ff597e4005cd8b618f4dbe59f734cb657e354",
+  "targets": [
+    "basalt",
+    "chalk",
+    "diorite",
+    "emery",
+    "flint",
+    "gabbro"
+  ],
+  "evidence": "Native emulator; physical-watch checks remain open."
+}
