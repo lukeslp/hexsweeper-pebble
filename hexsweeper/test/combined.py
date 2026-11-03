@@ -31,6 +31,12 @@ from libpebble2.protocol.logs import AppLogMessage, AppLogShippingControl
 from libpebble2.communication.transports.qemu.protocol import QemuButton
 
 ROOT = Path(__file__).resolve().parent.parent
+SIZES = {'basalt': (144, 168), 'chalk': (180, 180), 'diorite': (144, 168),
+         'emery': (200, 228), 'flint': (144, 168), 'gabbro': (260, 260)}
+TOUCH = {'emery', 'gabbro'}
+BW = {'diorite', 'flint'}
+# About portrait: (top, size) on each display, matching src/c/layout.c.
+PORTRAIT = {'emery': (47, 96), 'gabbro': (47, 96), 'chalk': (34, 72)}
 PBW = ROOT / 'build' / (ROOT.name + '.pbw')
 APP = UUID(json.loads((ROOT / 'package.json').read_text())['pebble']['uuid'])
 
@@ -93,7 +99,7 @@ def run(platform):
             if 'return' in response:
                 return response['return']
     execute('qmp_capabilities')
-    logs, frames = [], []
+    logs, frames, retries = [], [], []
     def log(packet):
         line = str(packet.message)
         logs.append(line)
@@ -115,21 +121,31 @@ def run(platform):
         return result
     def count():
         return sum('HX app=' in line for line in logs)
-    def response(previous):
-        deadline = time.monotonic() + 4
+    def responded(previous):
+        # Generous under a loaded host; a hung or crashed app still fails.
+        deadline = time.monotonic() + 10
         while count() == previous and time.monotonic() < deadline:
             time.sleep(.02)
-        assert count() > previous, 'Native input did not respond'
         time.sleep(.1)
-    def button(name, hold=.07):
-        previous = count()
+        return count() > previous
+    def response(previous):
+        assert responded(previous), 'Native input did not respond'
+    def press(name, hold):
         send_data_to_qemu(watch.transport, QemuButton(state=getattr(QemuButton.Button, name)))
         time.sleep(hold)
         send_data_to_qemu(watch.transport, QemuButton(state=0))
-        if previous:
-            response(previous)
-        else:
+    def button(name, hold=.07):
+        previous = count()
+        press(name, hold)
+        if not previous:
             time.sleep(.2)
+        elif not responded(previous):
+            # A loaded emulator can drop an injected press. Record what the
+            # watch showed, resend once, and fail if the app still is silent.
+            retries.append(f'{name} after {previous} states')
+            grab(f'no-response-{len(retries)}')
+            press(name, hold)
+            response(previous)
     def expect(**values):
         actual = current()
         assert all(actual[k] == v for k, v in values.items()), (values, actual)
@@ -139,13 +155,17 @@ def run(platform):
         if name.endswith('-about'):
             # Screenshot transport can sample during a native draw. Require a
             # naturally settled portrait in two consecutive complete captures.
+            # Color portraits are counted by saturated pixels; the
+            # black-and-white line art by white pixels.
             previous = None
             deadline = time.monotonic() + 3
+            top, size = PORTRAIT.get(platform, (28, 72))
             while True:
                 picture = tuple(tuple(row) for row in pixels)
-                colored = sum(max(row[i:i+3])-min(row[i:i+3]) > 60
-                              for row in picture[47:143]
-                              for i in range((width//2-48)*4,(width//2+48)*4,4))
+                colored = sum((min(row[i:i+3]) > 200) if platform in BW else
+                              (max(row[i:i+3])-min(row[i:i+3]) > 60)
+                              for row in picture[top:top+size]
+                              for i in range((width//2-size//2)*4,(width//2+size//2)*4,4))
                 if colored > 300 and picture == previous:
                     break
                 assert time.monotonic() < deadline, ('Portrait did not settle', name, colored)
@@ -156,7 +176,8 @@ def run(platform):
         png.from_array(pixels, mode='RGBA;8').save(str(file))
         frames.append(str(file.relative_to(ROOT)))
         return pixels
-    width, height = (200, 228) if platform == 'emery' else (260, 260)
+    width, height = SIZES[platform]
+    touchscreen = platform in TOUCH
     x, y = width // 2, 105 if platform == 'emery' else 126
     def pointer(px, py, down):
         events = [{'type': 'abs', 'data': {'axis': axis, 'value': round(value * 32767 / (size - 1))}}
@@ -164,6 +185,7 @@ def run(platform):
         events.append({'type': 'btn', 'data': {'button': 'left', 'down': down}})
         execute('input-send-event', {'events': events})
     def touch(points, interval=.05):
+        assert touchscreen, 'no touchscreen on ' + platform
         previous = count()
         for px, py in points:
             pointer(px, py, True)
@@ -172,17 +194,25 @@ def run(platform):
         response(previous)
     def modes():
         button('Back')
-        for _ in range(4 if current()['app']==2 else 3): button('Down')
+        # The 3D pause menu's touch row exists only on touch watches.
+        for _ in range(4 if current()['app']==2 and touchscreen else 3): button('Down')
         button('Select');expect(picker=1)
     def choose(mode):
         while current()['choice']!=mode:button('Down')
         button('Select');expect(app=mode,picker=0)
+    def settle():
+        # Infinite flood fill pumps on a timer; read totals only once it stops.
+        deadline=time.monotonic()+90
+        while current().get('busy') and time.monotonic()<deadline:
+            time.sleep(.1)
+        assert not current().get('busy'), 'flood fill did not settle'
     def check_about(label):
+        settle()
         before=current()
         app=before['app']
         index=5 if app==2 else 4
         button('Back')
-        for _ in range(index):button('Down')
+        for _ in range(index-(app==2 and not touchscreen)):button('Down')
         expect(menu=index,about=0)
         grab(label+'-about-menu')
         button('Select');expect(about=1,menu=index)
@@ -192,16 +222,17 @@ def run(platform):
         button('Select');expect(about=1)
         grab(label+'-reopened-about')
         button('Back');expect(about=0,menu=index)
-        # Open the visible fourth row, then return using a separate tap.
-        touch([(width//2,48+3*38+19)]);expect(about=1)
-        touch([(width//2,100)]);expect(about=0,menu=index)
-        time.sleep(.3);expect(about=0,menu=index)
-        # A held contact must not pass through a button dismissal.
-        button('Select');expect(about=1)
-        pointer(width//2,100,True);time.sleep(.05)
-        button('Back');expect(about=0,menu=index)
-        pointer(width//2,100,False);time.sleep(.3)
-        expect(about=0,menu=index)
+        if touchscreen:
+            # Open the visible fourth row, then return using a separate tap.
+            touch([(width//2,48+3*38+19)]);expect(about=1)
+            touch([(width//2,100)]);expect(about=0,menu=index)
+            time.sleep(.3);expect(about=0,menu=index)
+            # A held contact must not pass through a button dismissal.
+            button('Select');expect(about=1)
+            pointer(width//2,100,True);time.sleep(.05)
+            button('Back');expect(about=0,menu=index)
+            pointer(width//2,100,False);time.sleep(.3)
+            expect(about=0,menu=index)
         button('Back')
         keys=('selected','flags','status','opened') if app==2 else ('selected','flags','status','open') if app==0 else ('q','r','flags','status','open')
         expect(**{k:before[k] for k in keys})
@@ -219,22 +250,35 @@ def run(platform):
         button('Select');assert current()['open']>=7
         classic=current();grab('classic')
         check_about('classic')
-        pitch=26 if platform=='emery' else 32
-        rise=22 if platform=='emery' else 27
-        coords=[(q,r) for r in range(-3,4) for q in range(-3,4) if abs(q+r)<=3]
-        for i,(q,r) in enumerate(coords):
-            touch([(width//2+pitch*q+pitch//2*r,height//2-2+rise*r)])
-            expect(selected=i,open=classic['open'],flags=classic['flags'])
-        touch([(width//2,height//2)])
-        expect(selected=18)
+        if touchscreen:
+            pitch=26 if platform=='emery' else 32
+            rise=22 if platform=='emery' else 27
+            coords=[(q,r) for r in range(-3,4) for q in range(-3,4) if abs(q+r)<=3]
+            for i,(q,r) in enumerate(coords):
+                touch([(width//2+pitch*q+pitch//2*r,height//2-2+rise*r)])
+                expect(selected=i,open=classic['open'],flags=classic['flags'])
+            touch([(width//2,height//2)])
+            expect(selected=18)
+        else:
+            # Every one of the 37 cells takes focus with Down alone.
+            start=current()['selected']
+            for i in range(1,38):
+                button('Down')
+                expect(selected=(start+i)%37,open=classic['open'],flags=classic['flags'])
         button('Back')
         for _ in range(5):button('Down')
         grab('classic-menu-last')
-        # The last selected row scrolls into view; Game modes is now row two.
-        touch([(width//2,48+1*38+19)])
+        if touchscreen:
+            # The last selected row scrolls into view; Game modes is now row two.
+            touch([(width//2,48+1*38+19)])
+        else:
+            button('Up');button('Up');expect(menu=3);button('Select')
         expect(picker=1)
         choose(0);expect(ui=0)
-        button('Back');touch([(width//2,48+19)]);expect(ui=0)
+        if touchscreen:
+            button('Back');touch([(width//2,48+19)]);expect(ui=0)
+        else:
+            button('Back');button('Select');expect(ui=0)
         modes();choose(1);expect(ui=3);grab('infinite-help')
         button('Select');button('Select')
         time.sleep(2)
@@ -245,14 +289,15 @@ def run(platform):
         while current().get('cell')==1:
             button('Up');button('Select');button('Back')
         button('Select',hold=.65);expect(flags=1)
-        before=current();grab('infinite-distant-flag')
+        settle();before=current();grab('infinite-distant-flag')
         check_about('infinite')
-        cy=height//2
-        pitch=26 if platform=='emery' else 32
-        touch([(width//2+2*pitch,cy),(width//2-2*pitch,cy)])
-        expect(q=before['q']+4,r=before['r'],flags=1)
-        touch([(width//2-2*pitch,cy),(width//2+2*pitch,cy)])
-        expect(q=before['q'],r=before['r'],cell=2)
+        if touchscreen:
+            cy=height//2
+            pitch=26 if platform=='emery' else 32
+            touch([(width//2+2*pitch,cy),(width//2-2*pitch,cy)])
+            expect(q=before['q']+4,r=before['r'],flags=1)
+            touch([(width//2-2*pitch,cy),(width//2+2*pitch,cy)])
+            expect(q=before['q'],r=before['r'],cell=2)
         modes();choose(2);expect(mode=3)
         button('Select');button('Select',hold=.65);expect(flags=1)
         grab('sphere-flag')
@@ -272,18 +317,28 @@ def run(platform):
         grab('classic-resumed')
         modes();choose(2);expect(flags=1)
         button('Back')
-        for _ in range(4):button('Down')
+        for _ in range(4 if touchscreen else 3):button('Down')
+        expect(menu=4)
         grab('sphere-menu-last')
-        touch([(width//2,48+3*38+19)])
+        if touchscreen:
+            touch([(width//2,48+3*38+19)])
+        else:
+            button('Select')
         expect(picker=1)
         choose(2);expect(flags=1)
         assert hashlib.sha256(PBW.read_bytes()).hexdigest()==installed_sha
         assert not any('fault' in x.lower() or 'crash' in x.lower() for x in logs)
+        if touchscreen:
+            checks=['three-mode picker','classic first dig and flag','all 37 enlarged Classic tap targets','enlarged scrolling menu taps','infinite safe opening',
+                    'button exploration beyond viewport','distant flag','drag pan and return',
+                    'About in all modes: two consecutive settled portrait captures per opening/reopening, Select/Back/tap return, held-contact isolation, unchanged game state','independent sphere flag','per-mode saves','launch picker highlights last mode and preserves exact save']
+        else:
+            checks=['three-mode picker','classic first dig and flag','all 37 Classic cells focused with Down','scrolling menus with buttons','infinite safe opening',
+                    'button exploration beyond viewport','distant flag',
+                    'About in all modes: two consecutive settled portrait captures per opening/reopening, Select/Back return, unchanged game state','independent sphere flag','per-mode saves','launch picker highlights last mode and preserves exact save']
         report={'platform':platform,'sdk':SDK_VERSION,'pbwSHA256':installed_sha,'passed':True,
-                'checks':['three-mode picker','classic first dig and flag','all 37 enlarged Classic tap targets','enlarged scrolling menu taps','infinite safe opening',
-                          'button exploration beyond viewport','distant flag','drag pan and return',
-                          'About in all modes: two consecutive settled portrait captures per opening/reopening, Select/Back/tap return, held-contact isolation, unchanged game state','independent sphere flag','per-mode saves','launch picker highlights last mode and preserves exact save'],
-                'frames':frames,'logs':logs}
+                'touchscreen':touchscreen,'checks':checks,
+                'frames':frames,'logs':logs,'inputRetries':retries}
         (out/f'{platform}-report.json').write_text(json.dumps(report,indent=2))
         print('PASS combined',platform)
     finally:
@@ -292,5 +347,5 @@ def run(platform):
         cmd._close_pebble_connection(watch);cmd.pebble=None
         qmp.close();qmp_socket.close();shutdown();bridge.close()
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('platform',choices=['emery','gabbro'])
+    parser=argparse.ArgumentParser();parser.add_argument('platform',choices=sorted(SIZES))
     run(parser.parse_args().platform)

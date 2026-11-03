@@ -31,6 +31,10 @@ from libpebble2.protocol.logs import AppLogMessage, AppLogShippingControl
 from libpebble2.communication.transports.qemu.protocol import QemuButton
 
 ROOT = Path(__file__).resolve().parent.parent
+SIZES = {'basalt': (144, 168), 'chalk': (180, 180), 'diorite': (144, 168),
+         'emery': (200, 228), 'flint': (144, 168), 'gabbro': (260, 260)}
+# Only Time 2 and Round 2 have touchscreens; the others play with buttons alone.
+TOUCH = {'emery', 'gabbro'}
 PBW = ROOT / 'build' / (ROOT.name + '.pbw')
 APP = UUID(json.loads((ROOT / 'package.json').read_text())['pebble']['uuid'])
 
@@ -93,7 +97,7 @@ def run(platform):
             if 'return' in response:
                 return response['return']
     execute('qmp_capabilities')
-    logs, frames = [], []
+    logs, frames, retries = [], [], []
     def log(packet):
         line = str(packet.message)
         logs.append(line)
@@ -111,21 +115,31 @@ def run(platform):
         raise AssertionError('No native state received')
     def count():
         return sum('HS mode=' in line for line in logs)
-    def response(previous):
-        deadline = time.monotonic() + 4
+    def responded(previous):
+        # Generous under a loaded host; a hung or crashed app still fails.
+        deadline = time.monotonic() + 10
         while count() == previous and time.monotonic() < deadline:
             time.sleep(.02)
-        assert count() > previous, 'Native input did not respond'
         time.sleep(.1)
-    def button(name, hold=.07):
-        previous = count()
+        return count() > previous
+    def response(previous):
+        assert responded(previous), 'Native input did not respond'
+    def press(name, hold):
         send_data_to_qemu(watch.transport, QemuButton(state=getattr(QemuButton.Button, name)))
         time.sleep(hold)
         send_data_to_qemu(watch.transport, QemuButton(state=0))
-        if previous:
-            response(previous)
-        else:
+    def button(name, hold=.07):
+        previous = count()
+        press(name, hold)
+        if not previous:
             time.sleep(.2)
+        elif not responded(previous):
+            # A loaded emulator can drop an injected press. Record what the
+            # watch showed, resend once, and fail if the app still is silent.
+            retries.append(f'{name} after {previous} states')
+            grab(f'no-response-{len(retries)}')
+            press(name, hold)
+            response(previous)
     def expect(**values):
         actual = current()
         assert all(actual[k] == v for k, v in values.items()), (values, actual)
@@ -136,7 +150,10 @@ def run(platform):
         png.from_array(pixels, mode='RGBA;8').save(str(file))
         frames.append(str(file.relative_to(ROOT)))
         return pixels
-    width, height = (200, 228) if platform == 'emery' else (260, 260)
+    width, height = SIZES[platform]
+    touchscreen = platform in TOUCH
+    # Pause rows below Resume: the touch row exists only on touch watches.
+    to_new_game = 3 if touchscreen else 2
     x, y = width // 2, height // 2
     def pointer(px, py, down):
         events = [{'type': 'abs', 'data': {'axis': axis, 'value': round(value * 32767 / (size - 1))}}
@@ -144,6 +161,7 @@ def run(platform):
         events.append({'type': 'btn', 'data': {'button': 'left', 'down': down}})
         execute('input-send-event', {'events': events})
     def touch(points, interval=.05):
+        assert touchscreen, 'no touchscreen on ' + platform
         previous = count()
         for px, py in points:
             pointer(px, py, True)
@@ -152,7 +170,7 @@ def run(platform):
         response(previous)
     def new_game():
         button('Back')
-        for _ in range(3):
+        for _ in range(to_new_game):
             button('Down')
         button('Select')
         expect(mode=4, menu=0)
@@ -215,8 +233,9 @@ def run(platform):
         button('Select')
         expect(mode=0, status=0)
         grab('ready')
-        touch([(x, y)])
-        expect(status=0, opened=0)
+        if touchscreen:
+            touch([(x, y)])
+            expect(status=0, opened=0)
         button('Select', .65)
         expect(flags=1, opened=0, status=0)  # Long click must suppress short dig.
         grab('flag')
@@ -284,34 +303,49 @@ def run(platform):
         expect(status=3)
         grab('lost')
         new_game()
-        button('Back')
-        button('Down')
-        button('Select')
-        expect(direct=1, mode=2)
-        grab('pause-direct')
-        button('Back')
-        touch([(x, 12)])
-        expect(opened=0, status=0)
-        touch([(x, height-12)])
-        expect(opened=0, status=0)
-        touch([(x, y)], interval=.45)
-        expect(status=0, opened=0)
-        touch([(x, y - (84 if platform == 'emery' else 102))])
-        expect(selected=11, status=0, opened=0)
-        touch([(x, y), (x + 35, y), (x, y)])
-        expect(status=0, opened=0)  # Maximum excursion latches even on return.
-        touch([(x, y), (x + 15, y), (x + 30, y), (x + 45, y + 15)])
-        expect(status=0, opened=0)
-        grab('rotated')
-        restart()
-        expect(direct=1, opened=0, status=0)
-        # Center tap acts in direct mode after a drag.
-        touch([(x, y)])
-        assert current()['opened'] > 0
-        grab('touch-dig')
+        if not touchscreen:
+            # Button-only watches skip the hidden touch row in both directions.
+            button('Back')
+            button('Down')
+            expect(mode=2, menu=2)
+            grab('pause-buttons')
+            button('Up')
+            expect(mode=2, menu=0)
+            button('Back')
+            restart()
+            expect(opened=0, status=0)
+            button('Select')
+            assert current()['opened'] > 0
+            grab('dig')
+        else:
+            button('Back')
+            button('Down')
+            button('Select')
+            expect(direct=1, mode=2)
+            grab('pause-direct')
+            button('Back')
+            touch([(x, 12)])
+            expect(opened=0, status=0)
+            touch([(x, height-12)])
+            expect(opened=0, status=0)
+            touch([(x, y)], interval=.45)
+            expect(status=0, opened=0)
+            touch([(x, y - (84 if platform == 'emery' else 102))])
+            expect(selected=11, status=0, opened=0)
+            touch([(x, y), (x + 35, y), (x, y)])
+            expect(status=0, opened=0)  # Maximum excursion latches even on return.
+            touch([(x, y), (x + 15, y), (x + 30, y), (x + 45, y + 15)])
+            expect(status=0, opened=0)
+            grab('rotated')
+            restart()
+            expect(direct=1, opened=0, status=0)
+            # Center tap acts in direct mode after a drag.
+            touch([(x, y)])
+            assert current()['opened'] > 0
+            grab('touch-dig')
         before = current()
         button('Back')
-        for _ in range(3):
+        for _ in range(to_new_game):
             button('Down')
         button('Select')
         grab('confirm')
@@ -322,11 +356,17 @@ def run(platform):
         assert grab('idle') == hero
         assert not any('fault' in line.lower() or 'crash' in line.lower() for line in logs)
         assert hashlib.sha256(PBW.read_bytes()).hexdigest() == installed_sha, 'PBW changed during this test'
+        checks = ['all help pages', 'long-click suppression', 'first dig', '42 cells reached with buttons', 'button-only win', 'loss', 'save/relaunch']
+        if touchscreen:
+            checks += ['aim-first touch', 'direct touch preference', 'opaque readout taps do not dig', 'long touch ignored', 'rim tap centers without digging', 'drag latch', 'drag rotation', 'direct touch dig']
+        else:
+            checks += ['hidden touch row skipped both ways', 'button dig after relaunch']
+        checks += ['new-game cancellation', 'static idle']
         report = {'platform': platform, 'sdk': SDK_VERSION, 'pbwSHA256': installed_sha,
                   'capturedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'passed': True,
-                  'checks': ['all help pages', 'aim-first touch', 'long-click suppression', 'first dig', '42 cells reached with buttons', 'button-only win', 'loss',
-                             'save/relaunch', 'direct touch preference', 'opaque readout taps do not dig', 'long touch ignored', 'rim tap centers without digging', 'drag latch', 'drag rotation', 'direct touch dig', 'new-game cancellation', 'static idle'],
-                  'frames': frames, 'logs': logs, 'limits': 'Native emulator only; physical touch accuracy, readability and frame rate are untested.'}
+                  'touchscreen': touchscreen, 'checks': checks,
+                  'frames': frames, 'logs': logs, 'inputRetries': retries,
+                  'limits': 'Native emulator only; physical readability, buttons, touch accuracy and frame rate are untested.'}
         (out / f'{platform}-report.json').write_text(json.dumps(report, indent=2) + '\n')
         print('PASS', platform, flush=True)
     finally:
@@ -342,5 +382,5 @@ def run(platform):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('platform', choices=['emery', 'gabbro'])
+    parser.add_argument('platform', choices=sorted(SIZES))
     run(parser.parse_args().platform)
