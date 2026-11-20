@@ -19,7 +19,9 @@ The combined app is on the Rebble store as
 
 Each app folder keeps its released builds under `release/<version>/` (the
 `.pbw`, a source ZIP, emulator screenshots, test reports and checksums) and its
-store media under `store/<version>/`.
+store media under `store/<version>/`. Older listing records (in earlier
+commits) and the release source ZIPs contain absolute paths from the original
+checkout; the current listing records use paths relative to this repository.
 
 ## Building
 
